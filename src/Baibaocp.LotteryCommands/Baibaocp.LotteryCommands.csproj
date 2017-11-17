@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Baibaocp.LotteryVender.Sending.Abstractions\Baibaocp.LotteryVender.Sending.Abstractions.csproj" />
+    <ProjectReference Include="..\Baibaocp.LotteryCommand.Abstractions\Baibaocp.LotteryCommand.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

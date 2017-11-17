@@ -10,7 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Baibaocp.LotteryVender.Sending.Shanghai\Baibaocp.LotteryVender.Sending.Shanghai.csproj" />
+    <ProjectReference Include="..\..\src\Baibaocp.LotteryCommand.Abstractions\Baibaocp.LotteryCommand.Abstractions.csproj" />
+    <ProjectReference Include="..\..\src\Baibaocp.LotteryCommands\Baibaocp.LotteryCommands.csproj" />
   </ItemGroup>
 
 </Project>

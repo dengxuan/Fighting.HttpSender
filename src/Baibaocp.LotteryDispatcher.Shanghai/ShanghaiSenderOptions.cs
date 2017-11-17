@@ -11,6 +11,5 @@ namespace Baibaocp.LotteryVender.Sending.Shanghai
         public string VenderId { get; set; }
 
         public string SecretKey { get; set; }
-        public string CommandId { get; set; }
     }
 }
