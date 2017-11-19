@@ -1,4 +1,4 @@
-﻿namespace Baibaocp.LotteryCommand.Models
+﻿namespace Baibaocp.LvpApi.Models
 {
     public class ExecuteError
     {

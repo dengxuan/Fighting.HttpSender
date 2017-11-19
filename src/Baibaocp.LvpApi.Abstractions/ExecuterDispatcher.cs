@@ -1,0 +1,50 @@
+﻿using Baibaocp.LvpApi.Abstractions;
+using Fighting.Extengions.Messaging.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Threading.Tasks;
+
+namespace Baibaocp.LvpApi
+{
+    public class ExecuterDispatcher : IExecuterDispatcher
+    {
+
+        private readonly IServiceProvider _resolver;
+
+        private readonly ExecuterOptions _options;
+
+        public ExecuterDispatcher(IServiceProvider resolver, IMessagePublisher messagePublisher, ExecuterOptions options)
+        {
+            _resolver = resolver;
+            _options = options;
+        }
+
+
+        public async Task<ExecuteResult> DispatchAsync<TExecuter>(TExecuter executer) where TExecuter : IExecuter
+        {
+            var executeHandler = await GetHandlerAsync<IExecuteHandler<TExecuter>, TExecuter>(executer);
+
+            var executeResult = await executeHandler.HandleAsync(executer);
+
+            return executeResult;
+        }
+
+        private Task<THandler> GetHandlerAsync<THandler, TExecuter>(TExecuter executer) where THandler : IExecuteHandler<TExecuter> where TExecuter : IExecuter
+        {
+            if (executer == null)
+            {
+                throw new ArgumentNullException(nameof(executer));
+            }
+            var executeHandlers = _resolver.GetServices<THandler>();
+            if (executeHandlers == null)
+            {
+                throw new Exception($"No handler found for executer '{executer.GetType().FullName}'");
+            }
+            foreach (var handler in executeHandlers)
+            {
+                return Task.FromResult(handler);
+            }
+            throw new Exception($"No handler support for executer '{executer.GetType().FullName}'");
+        }
+    }
+}

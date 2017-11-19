@@ -1,10 +1,12 @@
-﻿using Baibaocp.LotteryCommand.Models;
+﻿using Baibaocp.LvpApi.Models;
 
-namespace Baibaocp.LotteryCommand.Abstractions
+namespace Baibaocp.LvpApi.Abstractions
 {
     public class ExecuteResult
     {
         public bool Success { get; set; }
+
+        public string VenderId { get; set; }
 
         public ExecuteError Error { get; set; }
 

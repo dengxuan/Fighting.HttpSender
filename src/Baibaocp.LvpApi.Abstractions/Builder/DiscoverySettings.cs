@@ -2,9 +2,9 @@
 using Scrutor;
 using System.Collections.Generic;
 using System.Reflection;
-using Baibaocp.LotteryCommand.Abstractions;
+using Baibaocp.LvpApi.Abstractions;
 
-namespace Baibaocp.LotteryCommand.Builder
+namespace Baibaocp.LvpApi.Builder
 {
     /// <summary>
     /// Type discovery settings

@@ -2,10 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>Baibaocp.LotteryCommand</RootNamespace>
+    <RootNamespace>Baibaocp.LvpApi</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Fighting.Extengions.Messaging.Abstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="2.0.0" />
     <PackageReference Include="Scrutor" Version="2.1.2" />

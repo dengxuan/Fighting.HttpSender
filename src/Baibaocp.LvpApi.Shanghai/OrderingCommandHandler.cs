@@ -1,6 +1,7 @@
-﻿using Baibaocp.Extensions;
-using Baibaocp.LotteryCommand.Abstractions;
-using Baibaocp.LotteryCommand.Models;
+﻿using Baibaocp.LvpApi.Abstractions;
+using Baibaocp.LvpApi.Executers;
+using Baibaocp.LvpApi.Models;
+using Fighting.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -9,15 +10,18 @@ using System.Xml.Linq;
 
 namespace Baibaocp.LotteryVender.Sending.Shanghai
 {
-    public class OrderingCommandHandler : ICommandHandlerAsync<OrderingCommand>
+    public class OrderingCommandHandler : IExecuteHandler<OrderingExecuter>
     {
         private readonly HttpClient _httpClient;
         private readonly ShanghaiSenderOptions _options;
         private readonly string _commandId = "101";
 
+        public string LvpVenderId { get; }
+
         public OrderingCommandHandler(ShanghaiSenderOptions options)
         {
             _options = options;
+            LvpVenderId = options.VenderId;
             HttpClientHandler handler = new HttpClientHandler();
             //handler.Proxy = new WebProxy("http://127.0.0.1:8888/");
             _httpClient = new HttpClient(handler)
@@ -29,11 +33,11 @@ namespace Baibaocp.LotteryVender.Sending.Shanghai
 
         protected string Signature(DateTime timestamp, string value)
         {
-            string text = string.Format("{0}{1}{2:yyyyMMddHHmm}{3}{4}", _options.VenderId, _commandId, timestamp, value, _options.SecretKey);
+            string text = string.Format("{0}{1}{2:yyyyMMddHHmm}{3}{4}", LvpVenderId, _commandId, timestamp, value, _options.SecretKey);
             return text.ToMd5();
         }
 
-        public async Task<ExecuteResult> HandleAsync(OrderingCommand command)
+        public async Task<ExecuteResult> HandleAsync(OrderingExecuter command)
         {
             string[] values = new string[]
             {
@@ -51,7 +55,7 @@ namespace Baibaocp.LotteryVender.Sending.Shanghai
             string sign = Signature(timestamp, value);
             FormUrlEncodedContent content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
             {
-                new KeyValuePair<string, string>("wAgent", _options.VenderId),
+                new KeyValuePair<string, string>("wAgent", LvpVenderId),
                 new KeyValuePair<string, string>("wAction",_commandId),
                 new KeyValuePair<string, string>("wMsgID", timestamp.ToString("yyyyMMddHHmm")),
                 new KeyValuePair<string, string>("wSign",sign.ToLower()),
@@ -60,12 +64,12 @@ namespace Baibaocp.LotteryVender.Sending.Shanghai
             HttpResponseMessage responseMessage = await _httpClient.PostAsync("lotsale/lot", content);
             if (responseMessage.IsSuccessStatusCode)
             {
-                string msg = responseMessage.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                string msg = await responseMessage.Content.ReadAsStringAsync();
                 XDocument xml = XDocument.Parse(msg);
                 string Status = xml.Element("ActionResult").Element("xCode").Value;
                 if (Status.Equals("0") || Status.Equals("1"))
                 {
-                    return new ExecuteResult();
+                    return new ExecuteResult() { VenderId = _options.VenderId };
                 }
                 return new ExecuteResult(false);
             }

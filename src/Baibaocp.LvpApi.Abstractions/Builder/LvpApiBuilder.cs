@@ -1,4 +1,4 @@
-﻿using Baibaocp.LotteryCommand.Abstractions;
+﻿using Baibaocp.LvpApi.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -9,15 +9,15 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Baibaocp.LotteryCommand.Builder
+namespace Baibaocp.LvpApi.Builder
 {
-    public class LotteryCommandBuilder
+    public class LvpApiBuilder
     {
         private readonly DiscoverySettings _discoverySettings = new DiscoverySettings();
 
         public IServiceCollection Services { get; }
 
-        internal LotteryCommandBuilder(IServiceCollection services)
+        internal LvpApiBuilder(IServiceCollection services)
         {
             Services = services;
         }
@@ -25,8 +25,8 @@ namespace Baibaocp.LotteryCommand.Builder
         private void AddHandlerDiscovery()
         {
             Services.Scan(s =>
-                        s.FromAssemblies(_discoverySettings.CommandHandlerAssemblies)
-                    .AddClasses(f => f.AssignableTo(typeof(ICommandHandlerAsync<>)), !_discoverySettings.IncludeNonPublic)
+                        s.FromApplicationDependencies()
+                    .AddClasses(f => f.AssignableTo(typeof(IExecuteHandler<>)), !_discoverySettings.IncludeNonPublic)
                     .UsingRegistrationStrategy(_discoverySettings.RegistrationStrategy)
                     .AsImplementedInterfaces()
                     .WithLifetime(_discoverySettings.DiscoveredHandlersLifetime));
@@ -48,13 +48,13 @@ namespace Baibaocp.LotteryCommand.Builder
             Services.TryAddSingleton(_discoverySettings.CommandHandlerAssemblies);
         }
 
-        public LotteryCommandBuilder ConfigureOptions(Action<CommandOptions> options)
+        public LvpApiBuilder ConfigureOptions(Action<ExecuterOptions> options)
         {
             Services.Configure(options);
             return this;
         }
 
-        public LotteryCommandBuilder AddHandlerDiscovery(Action<DiscoverySettings> discoverySettings)
+        public LvpApiBuilder AddHandlerDiscovery(Action<DiscoverySettings> discoverySettings)
         {
             discoverySettings(_discoverySettings);
             return this;
@@ -62,8 +62,8 @@ namespace Baibaocp.LotteryCommand.Builder
 
         internal void Build()
         {
-            Services.TryAddEnumerable(ServiceDescriptor.Transient<IConfigureOptions<CommandOptions>, DefaultCommandOptionsSetup>());
-            Services.AddSingleton(c => c.GetRequiredService<IOptions<CommandOptions>>().Value);
+            Services.TryAddEnumerable(ServiceDescriptor.Transient<IConfigureOptions<ExecuterOptions>, DefaultLvpApiOptionsSetup>());
+            Services.AddSingleton(c => c.GetRequiredService<IOptions<ExecuterOptions>>().Value);
             AddHandlerDiscovery();
         }
     }
