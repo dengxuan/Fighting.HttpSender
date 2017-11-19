@@ -30,22 +30,6 @@ namespace Baibaocp.LvpApi.Builder
                     .UsingRegistrationStrategy(_discoverySettings.RegistrationStrategy)
                     .AsImplementedInterfaces()
                     .WithLifetime(_discoverySettings.DiscoveredHandlersLifetime));
-
-            foreach (var assembly in _discoverySettings.CommandHandlerAssemblies)
-            {
-                IEnumerable<Type> types = assembly.GetTypes().Where(predicate =>
-                {
-                    return predicate.Name == "Setup";
-                });
-                foreach (var item in types)
-                {
-                    object @object = Activator.CreateInstance(item);
-                    MethodInfo method = item.GetMethod("Init");
-                    method.Invoke(@object, new object[] { Services });
-                }
-            }
-
-            Services.TryAddSingleton(_discoverySettings.CommandHandlerAssemblies);
         }
 
         public LvpApiBuilder ConfigureOptions(Action<ExecuterOptions> options)

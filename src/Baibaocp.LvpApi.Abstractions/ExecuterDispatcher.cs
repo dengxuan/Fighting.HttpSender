@@ -13,7 +13,7 @@ namespace Baibaocp.LvpApi
 
         private readonly ExecuterOptions _options;
 
-        public ExecuterDispatcher(IServiceProvider resolver, IMessagePublisher messagePublisher, ExecuterOptions options)
+        public ExecuterDispatcher(IServiceProvider resolver, ExecuterOptions options)
         {
             _resolver = resolver;
             _options = options;

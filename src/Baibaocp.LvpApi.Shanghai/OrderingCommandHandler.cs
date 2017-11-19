@@ -5,6 +5,7 @@ using Fighting.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 
@@ -64,7 +65,8 @@ namespace Baibaocp.LotteryVender.Sending.Shanghai
             HttpResponseMessage responseMessage = await _httpClient.PostAsync("lotsale/lot", content);
             if (responseMessage.IsSuccessStatusCode)
             {
-                string msg = await responseMessage.Content.ReadAsStringAsync();
+                byte[] bytes = await responseMessage.Content.ReadAsByteArrayAsync();
+                string msg = Encoding.GetEncoding("gb2312").GetString(bytes);
                 XDocument xml = XDocument.Parse(msg);
                 string Status = xml.Element("ActionResult").Element("xCode").Value;
                 if (Status.Equals("0") || Status.Equals("1"))
