@@ -1,0 +1,186 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Baibaocp.LotterySales.WebApi</name>
+    </assembly>
+    <members>
+        <member name="T:Baibaocp.LotteryVender.WebApi.Controllers.OrdersController">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Baibaocp.LotteryVender.WebApi.Controllers.OrdersController.#ctor(Fighting.Extensions.Messaging.Abstractions.IMessagePublisher,Fighting.Extensions.Caching.Abstractions.ICacheManager)">
+            <summary>
+            
+            </summary>
+            <param name="messagePublisher"></param>
+            <param name="cacheManager"></param>
+        </member>
+        <member name="M:Baibaocp.LotteryVender.WebApi.Controllers.OrdersController.PostAsync(System.Collections.Generic.List{Baibaocp.LotteryVender.WebApi.Entity.Order})">
+            <summary>
+            投注
+            </summary>
+            <param name="orders">订单列表</param>
+        </member>
+        <member name="T:Baibaocp.LotteryVender.WebApi.Entity.Order">
+            <summary>
+            用户订单
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.Order.Id">
+            <summary>
+            订单号
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.Order.UserId">
+            <summary>
+            用户编号
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.Order.LotteryId">
+            <summary>
+            彩种编号
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.Order.LotteryPlayId">
+            <summary>
+            玩法编号
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.Order.IssueNumber">
+            <summary>
+            期号
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.Order.InvestCode">
+            <summary>
+            投注码
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.Order.InvestType">
+            <summary>
+            投注类型
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.Order.InvestCount">
+            <summary>
+            注数
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.Order.InvestTimes">
+            <summary>
+            倍数
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.Order.InvestAmount">
+            <summary>
+            投注金额
+            </summary>
+        </member>
+        <member name="T:Baibaocp.LotteryVender.WebApi.Entity.OrderMessage">
+            <summary>
+            待投注消息
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.OrderMessage.Id">
+            <summary>
+            订单号
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.OrderMessage.LvpUserId">
+            <summary>
+            用户编号
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.OrderMessage.LvpVenderId">
+            <summary>
+            渠道编号
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.OrderMessage.LotteryId">
+            <summary>
+            彩种编号
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.OrderMessage.LotteryPlayId">
+            <summary>
+            玩法编号
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.OrderMessage.IssueNumber">
+            <summary>
+            期号
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.OrderMessage.InvestCode">
+            <summary>
+            投注码
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.OrderMessage.InvestType">
+            <summary>
+            投注类型
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.OrderMessage.InvestCount">
+            <summary>
+            注数
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.OrderMessage.InvestTimes">
+            <summary>
+            倍数
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.OrderMessage.InvestAmount">
+            <summary>
+            投注金额
+            </summary>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Entity.OrderMessage.CreationTime">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="T:Baibaocp.LotteryVender.WebApi.Startup">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Baibaocp.LotteryVender.WebApi.Startup.#ctor(Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            
+            </summary>
+            <param name="configuration"></param>
+        </member>
+        <member name="P:Baibaocp.LotteryVender.WebApi.Startup.Configuration">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Baibaocp.LotteryVender.WebApi.Startup.ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            This method gets called by the runtime. Use this method to add services to the container.
+            </summary>
+            <param name="services"></param>
+        </member>
+        <member name="M:Baibaocp.LotteryVender.WebApi.Startup.Configure(Microsoft.AspNetCore.Builder.IApplicationBuilder,Microsoft.AspNetCore.Hosting.IHostingEnvironment)">
+            <summary>
+            This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+            </summary>
+            <param name="app"></param>
+            <param name="env"></param>
+        </member>
+        <member name="T:Baibaocp.LotteryVender.WebApi.ValidateModelAttribute">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:Baibaocp.LotteryVender.WebApi.ValidateModelAttribute.OnActionExecuting(Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext)">
+            <summary>
+            
+            </summary>
+            <param name="context"></param>
+        </member>
+    </members>
+</doc>

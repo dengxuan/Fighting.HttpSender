@@ -1,0 +1,6 @@
+﻿namespace Baibaocp.LdpApi
+{
+    public class ExecuterOptions
+    {
+    }
+}

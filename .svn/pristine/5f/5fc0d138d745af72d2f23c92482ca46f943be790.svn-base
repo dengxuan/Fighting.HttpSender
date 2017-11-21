@@ -1,0 +1,119 @@
+﻿using Baibaocp.LotterySales.Core.Entities;
+using Baibaocp.LotteryVender.Messaging;
+using Baibaocp.LotteryVender.WebApi.Entity;
+using Fighting.Extensions.Caching.Abstractions;
+using Fighting.Extensions.Messaging.Abstractions;
+using Fighting.Storaging.Repositories.Abstractions;
+using Fighting.WebApi.Abstractions.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Baibaocp.LotteryVender.WebApi.Controllers
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    [Route("api/[controller]")]
+    [Authorize]
+    public class OrdersController : ControllerBase
+    {
+
+        private readonly ICacheManager _cacheManager;
+
+        private readonly IMessagePublisher _messagePublisher;
+
+        private readonly IRepository<LotterySalesOrderEntity> _repository;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="repository"></param>
+        /// <param name="cacheManager"></param>
+        /// <param name="messagePublisher"></param>
+        public OrdersController(IRepository<LotterySalesOrderEntity> repository, ICacheManager cacheManager, IMessagePublisher messagePublisher)
+        {
+            _repository = repository;
+            _cacheManager = cacheManager;
+            _messagePublisher = messagePublisher;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns></returns>
+        public async Task<Order> GetAsync(string orderId)
+        {
+            ICache cache = _cacheManager.GetCache("Baibaocp.LotterySales.Orders");
+            Order order = await cache.GetAsync(orderId, async cackeKey =>
+            {
+                LotterySalesOrderEntity entity = await _repository.FirstOrDefaultAsync(predicate => predicate.OrderId == cackeKey);
+                if (entity != null)
+                {
+                    return new Order
+                    {
+                        OrderId = entity.OrderId,
+                        UserId = entity.UserId,
+                        LotteryId = entity.LotteryId,
+                        InvestAmount = entity.InvestAmount,
+                        InvestCode = entity.InvestCode,
+                        InvestCount = entity.InvestCount,
+                        InvestTimes = entity.InvestTimes,
+                        InvestType = entity.InvestType,
+                        IssueNumber = entity.IssueNumber,
+                        LotteryPlayId = entity.LotteryPlayId
+                    };
+                }
+                return null;
+            });
+            return order;
+        }
+
+        /// <summary>
+        /// 投注
+        /// </summary>
+        /// <param name="order">订单</param>
+        [HttpPost]
+        [WrapResult]
+        public async Task PostAsync([FromBody] Order order)
+        {
+            if (ModelState.IsValid && User.Identity.IsAuthenticated)
+            {
+                ICache orderCache = _cacheManager.GetCache("Baibaocp.LotterySales.Orders");
+                OrderingMessage message = new OrderingMessage
+                {
+                    Id = order.OrderId,
+                    LvpUserId = order.UserId,
+                    LvpVenderId = "100010",
+                    LotteryId = order.LotteryId,
+                    LotteryPlayId = order.LotteryPlayId,
+                    IssueNumber = order.IssueNumber,
+                    InvestType = order.InvestType,
+                    InvestCode = order.InvestCode,
+                    InvestCount = order.InvestCount,
+                    InvestTimes = order.InvestTimes,
+                    InvestAmount = order.InvestAmount,
+                    CreationTime = DateTime.Now
+                };
+                await orderCache.SetAsync("Orders", Task.FromResult(order));
+                await _repository.InsertAsync(new LotterySalesOrderEntity
+                {
+                    OrderId = order.OrderId,
+                    InvestAmount = order.InvestAmount,
+                    InvestCode = order.InvestCode,
+                    InvestTimes = order.InvestTimes,
+                    InvestCount = order.InvestCount,
+                    InvestType = order.InvestType,
+                    IssueNumber = order.IssueNumber,
+                    LotteryId = order.LotteryId,
+                    LotteryPlayId = order.LotteryPlayId,
+                    UserId = order.UserId
+                });
+                await _messagePublisher.Publish(message, CancellationToken.None);
+            }
+        }
+    }
+}

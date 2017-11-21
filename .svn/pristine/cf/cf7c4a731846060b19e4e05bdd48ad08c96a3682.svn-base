@@ -1,0 +1,69 @@
+﻿using Baibaocp.LotteryVender.Messaging;
+using Baibaocp.LotteryVender.WebApi.Entity;
+using Fighting.Extensions.Caching.Abstractions;
+using Fighting.Extensions.Messaging.Abstractions;
+using Fighting.WebApi.Abstractions.Models;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace Baibaocp.LotteryVender.WebApi.Controllers
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    [Route("api/[controller]")]
+    public class OrdersController : ControllerBase
+    {
+        private readonly IMessagePublisher _messagePublisher;
+
+        private readonly ICacheManager _cacheManager;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="messagePublisher"></param>
+        /// <param name="cacheManager"></param>
+        public OrdersController(IMessagePublisher messagePublisher, ICacheManager cacheManager)
+        {
+            _messagePublisher = messagePublisher;
+            _cacheManager = cacheManager;
+        }
+
+        /// <summary>
+        /// 投注
+        /// </summary>
+        /// <param name="orders">订单列表</param>
+        [HttpPost]
+        [WrapResult]
+        public async Task<string> PostAsync([FromBody] List<Order> orders)
+        {
+            if (ModelState.IsValid)
+            {
+                ICache issueCacheing = _cacheManager.GetCache("Baibaocp.Lottery.IssueNumber");
+                foreach (var item in orders)
+                {
+                    OrderingMessage message = new OrderingMessage
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        LvpUserId = item.UserId,
+                        LvpVenderId = "100010",
+                        LotteryId = item.LotteryId,
+                        LotteryPlayId = item.LotteryPlayId,
+                        IssueNumber = item.IssueNumber,
+                        InvestType = item.InvestType,
+                        InvestCode = item.InvestCode,
+                        InvestCount = item.InvestCount,
+                        InvestTimes = item.InvestTimes,
+                        InvestAmount = item.InvestAmount,
+                        CreationTime = DateTime.Now
+                    };
+                    await _messagePublisher.Publish(message, CancellationToken.None);
+                }
+            }
+            return "OK";
+        }
+    }
+}

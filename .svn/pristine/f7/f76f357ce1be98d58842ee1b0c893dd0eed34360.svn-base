@@ -1,0 +1,123 @@
+﻿using Baibaocp.LotteryVender.Messaging;
+using Baibaocp.LotteryVender.WebApi.Entity;
+using Fighting.AspNetCore.WebApi.DependencyInjection;
+using Fighting.Extensions.Caching.DependencyInjection;
+using Fighting.Extensions.Caching.Redis.DependencyInjection;
+using Fighting.Extensions.Messaging.DependencyInjection;
+using Fighting.Extensions.Serialization.ProtoBuf.DependencyInjection;
+using IdentityServer4.AccessTokenValidation;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using RabbitMQ.Client;
+using Swashbuckle.AspNetCore.Swagger;
+using System;
+
+namespace Baibaocp.LotteryVender.WebApi
+{
+    /// <summary>
+    /// 
+    /// </summary>
+    public class Startup
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="configuration"></param>
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public IConfiguration Configuration { get; }
+
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services"></param>
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddFightingWebApi();
+            services.Configure<MvcOptions>(options =>
+            {
+                options.Filters.Add<ValidateModelAttribute>();
+            });
+            services.AddAuthentication();
+            services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
+                    .AddIdentityServerAuthentication(options =>
+                    {
+                        options.Authority = "http://localhost:5001";
+                        options.ApiName = "LotteryVender.WebApi";
+                        options.RequireHttpsMetadata = false;
+                    });
+
+            services.AddProtoBuf();
+
+            services.AddMessaging(builderAction =>
+            {
+                builderAction.AddMessage<OrderingMessage>("Orders.Waiting.Betting")
+                    .AddRbbitPublisher(o =>
+                    {
+                        o.VirtualHost = "/";
+                        o.Servername = "192.168.1.21";
+                        o.Username = "root";
+                        o.Password = "123qwe";
+                        o.Properties.ExchangeName = "Baibaocp.LotteryVender";
+                        o.Properties.QueueName = "Orders";
+                        o.Properties.ExchangeType = ExchangeType.Direct;
+                    })
+                    .ConfigureOptions(o => { });
+            });
+
+            services.AddCaching(builderAction => 
+            {
+                builderAction.AddRedis(setupAction => 
+                {
+                    setupAction.DatabaseId = 10;
+                    setupAction.ConnectionString = "192.168.1.21:6379,password=zf8Mjjo6rLKDzf81";
+                });
+            });
+
+            services.AddSwaggerGen(setupAction =>
+            {
+                setupAction.SwaggerDoc("v1", new Info { Title = "Lottery Vender API", Version = "v1" });
+                setupAction.DocInclusionPredicate((docName, description) => true);
+                setupAction.IncludeXmlComments(string.Format("{0}/Baibaocp.LotteryVender.WebApi.xml", AppDomain.CurrentDomain.BaseDirectory));
+            });
+        }
+
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        /// </summary>
+        /// <param name="app"></param>
+        /// <param name="env"></param>
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+
+            app.UseAuthentication();
+
+            //app.UseStaticFiles();
+
+            app.UseMvc();
+
+            app.UseSwagger(setupAction =>
+            {
+                setupAction.RouteTemplate = "api-docs/{documentName}/swagger.json";
+            });
+
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/api-docs/v1/swagger.json", "Lottery Vender API V1");
+            });
+        }
+    }
+}

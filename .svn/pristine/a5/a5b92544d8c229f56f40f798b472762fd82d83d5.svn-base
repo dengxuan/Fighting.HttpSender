@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>Baibaocp.LdpApi.Shanghai</AssemblyName>
+    <RootNamespace>Baibaocp.LdpApi.Shanghai</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fighting.Extensions.Messaging.RabbitMQ" Version="1.0.0" />
+    <PackageReference Include="Fighting.Extensions.Serialization.ProtoBuf" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0-preview1-27625" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.0-preview1-27625" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Baibaocp.LotteryVender.Shanghai\Baibaocp.LotteryVender.Shanghai.csproj" />
+  </ItemGroup>
+
+</Project>

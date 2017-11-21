@@ -1,0 +1,7 @@
+﻿namespace Baibaocp.LdpApi.Abstractions
+{
+    public interface IExecuter
+    {
+        string VenderId { get; }
+    }
+}
