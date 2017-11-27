@@ -6,6 +6,8 @@ using RabbitMQ.Client;
 using Baibaocp.LotteryVender.DependencyInjection;
 using Baibaocp.LotteryVender.Shanghai.DependencyInjection;
 using System.Threading.Tasks;
+using Baibaocp.LotteryVender.Messaging;
+using Baibaocp.Core.Messages;
 
 namespace Baibaocp.LotteryVender.Shanghai
 {
@@ -36,9 +38,11 @@ namespace Baibaocp.LotteryVender.Shanghai
                             options.Servername = "192.168.1.21";
                             options.Username = "root";
                             options.Password = "123qwe";
-                            options.Properties.ExchangeName = "Baibaocp.LotteryVender";
-                            options.Properties.QueueName = "Orders";
-                            options.Properties.ExchangeType = ExchangeType.Direct;
+                            options.ExchangeName = "Baibaocp.LotteryVender";
+                        }).ConfigureOptions(messageOptions => 
+                        {
+                            // 订阅接单队列
+                            messageOptions.AddConsumer<OrderingMessage>("Lvp.Orders.Dispatcher");
                         });
                     });
                     services.AddLotteryVender(builderAction =>

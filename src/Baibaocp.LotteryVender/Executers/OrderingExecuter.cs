@@ -2,11 +2,8 @@
 
 namespace Baibaocp.LotteryVender.Executers
 {
-    public class OrderingExecuter : Executer
+    public class OrderingExecuter : IExecuter
     {
-        public OrderingExecuter(string venderId) : base(venderId)
-        {
-        }
 
         public string OrderId { get; set; }
 

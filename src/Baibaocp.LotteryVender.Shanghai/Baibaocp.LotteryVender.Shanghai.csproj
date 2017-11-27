@@ -6,6 +6,14 @@
     <RootNamespace>Baibaocp.LvpApi.Shanghai</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Fighting.Extensions.Threading" Version="1.0.0" />
     <PackageReference Include="Fighting.Security.Cryptography" Version="1.0.0" />

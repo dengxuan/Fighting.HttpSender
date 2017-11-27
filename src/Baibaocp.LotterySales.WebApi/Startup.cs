@@ -1,4 +1,5 @@
-﻿using Baibaocp.LotteryVender.Messaging;
+﻿using Baibaocp.Core.Messages;
+using Baibaocp.LotteryVender.Messaging;
 using Baibaocp.Storaging.EntityFrameworkCore;
 using Fighting.AspNetCore.WebApi.DependencyInjection;
 using Fighting.Extensions.Caching.DependencyInjection;
@@ -62,18 +63,18 @@ namespace Baibaocp.LotteryVender.WebApi
 
             services.AddMessaging(builderAction =>
             {
-                builderAction.AddMessage<OrderingMessage>("Orders.Waiting.Betting")
-                    .AddRbbitPublisher(o =>
-                    {
-                        o.VirtualHost = "/";
-                        o.Servername = "192.168.1.21";
-                        o.Username = "root";
-                        o.Password = "123qwe";
-                        o.Properties.ExchangeName = "Baibaocp.LotteryVender";
-                        o.Properties.QueueName = "Orders";
-                        o.Properties.ExchangeType = ExchangeType.Direct;
-                    })
-                    .ConfigureOptions(o => { });
+                builderAction.AddRbbitPublisher(rabbitOptions =>
+                {
+                    rabbitOptions.VirtualHost = "/";
+                    rabbitOptions.Servername = "192.168.1.21";
+                    rabbitOptions.Username = "root";
+                    rabbitOptions.Password = "123qwe";
+                    rabbitOptions.ExchangeName = "Baibaocp.LotteryVender";
+                })
+                .ConfigureOptions(messageOpgions =>
+                {
+                    //messageOpgions.AddProducer<OrderingMessage>("Lvp.Orders");
+                });
             });
 
             services.AddCaching(builderAction =>

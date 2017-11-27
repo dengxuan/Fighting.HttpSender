@@ -2,6 +2,5 @@
 {
     public interface IExecuter
     {
-        string VenderId { get; }
     }
 }

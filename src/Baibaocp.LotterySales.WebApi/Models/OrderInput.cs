@@ -52,13 +52,13 @@ namespace Baibaocp.LotteryVender.WebApi.Entity
         /// 注数
         /// </summary>
         [Required]
-        public int InvestCount { get; set; }
+        public sbyte InvestCount { get; set; }
 
         /// <summary>
         /// 倍数
         /// </summary>
         [Required]
-        public int InvestTimes { get; set; }
+        public sbyte InvestTimes { get; set; }
 
         /// <summary>
         /// 投注金额

@@ -86,26 +86,28 @@ namespace Baibaocp.LotteryVender.WebApi.Controllers
         /// <param name="order">订单</param>
         [HttpPost]
         [WrapResult]
+        [AllowAnonymous]
         public async Task PostAsync([FromBody] OrderInput order)
         {
-            if (ModelState.IsValid && User.Identity.IsAuthenticated)
+            if (ModelState.IsValid)
             {
                 OrderingMessage message = new OrderingMessage
                 {
-                    Id = order.OrderId,
+                    OrderId = Guid.NewGuid().ToString("N"),
+                    LvpOrderId = order.OrderId,
                     LvpUserId = order.UserId,
                     LvpVenderId = "100010",
                     LotteryId = order.LotteryId,
                     LotteryPlayId = order.LotteryPlayId,
                     IssueNumber = order.IssueNumber,
-                    InvestType = order.InvestType,
+                    InvestType = order.InvestType == 1,
                     InvestCode = order.InvestCode,
                     InvestCount = order.InvestCount,
                     InvestTimes = order.InvestTimes,
                     InvestAmount = order.InvestAmount,
                     CreationTime = DateTime.Now
                 };
-                await _messagePublisher.Publish(message, CancellationToken.None);
+                await _messagePublisher.Publish("Orders.Readied", message, CancellationToken.None);
             }
         }
     }

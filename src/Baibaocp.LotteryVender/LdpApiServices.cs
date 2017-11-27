@@ -8,26 +8,17 @@ namespace Baibaocp.LotteryVender
     public class LdpApiServices : BackgroundService
     {
 
-        private readonly IMessageTypeTopicMap _messageTypeTopicMap;
-
         private readonly IRawMessageHandlerSubscriber _handlerSubscriber;
 
-        private readonly IRawMessageHandler _messageHandler;
-
-        public LdpApiServices(IMessageTypeTopicMap messageTypeTopicMap, IRawMessageHandler messageHandler, IRawMessageHandlerSubscriber handlerSubscriber)
+        public LdpApiServices(IRawMessageHandler messageHandler, IRawMessageHandlerSubscriber handlerSubscriber)
         {
-            _messageTypeTopicMap = messageTypeTopicMap;
             _handlerSubscriber = handlerSubscriber;
-            _messageHandler = messageHandler;
         }
 
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            foreach (var topic in _messageTypeTopicMap.GetTopics())
-            {
-               await _handlerSubscriber.Subscribe(topic, _messageHandler, stoppingToken);
-            }
+            await _handlerSubscriber.Subscribe(stoppingToken);
         }
     }
 }

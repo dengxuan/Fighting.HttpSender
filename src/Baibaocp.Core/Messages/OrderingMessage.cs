@@ -13,7 +13,12 @@ namespace Baibaocp.LotteryVender.Messaging
         /// 订单号
         /// </summary>
         [ProtoMember(1)]
-        public string Id { get; set; }
+        public string OrderId { get; set; }
+
+        /// <summary>
+        /// 下游渠道订单号
+        /// </summary>
+        public string LvpOrderId { get; set; }
 
         /// <summary>
         /// 用户编号
@@ -26,6 +31,11 @@ namespace Baibaocp.LotteryVender.Messaging
         /// </summary>
         [ProtoMember(3)]
         public string LvpVenderId { get; set; }
+
+        /// <summary>
+        /// 上游渠道编号
+        /// </summary>
+        public string LdpVenderId { get; set; }
 
         /// <summary>
         /// 彩种编号
@@ -55,25 +65,30 @@ namespace Baibaocp.LotteryVender.Messaging
         /// 投注类型
         /// </summary>
         [ProtoMember(8)]
-        public int InvestType { get; set; }
+        public bool InvestType { get; set; }
 
         /// <summary>
         /// 注数
         /// </summary>
         [ProtoMember(9)]
-        public int InvestCount { get; set; }
+        public sbyte InvestCount { get; set; }
 
         /// <summary>
         /// 倍数
         /// </summary>
         [ProtoMember(10)]
-        public int InvestTimes { get; set; }
+        public sbyte InvestTimes { get; set; }
 
         /// <summary>
         /// 投注金额
         /// </summary>
         [ProtoMember(11)]
         public int InvestAmount { get; set; }
+
+        /// <summary>
+        /// 订单状态
+        /// </summary>
+        public int Status { get; set; }
 
         /// <summary>
         /// 创建时间

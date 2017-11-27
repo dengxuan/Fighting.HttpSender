@@ -4,6 +4,7 @@ namespace Baibaocp.LotteryVender.Abstractions
 {
     public class ExecuteResult
     {
+
         public bool Success { get; set; }
 
         public string VenderId { get; set; }

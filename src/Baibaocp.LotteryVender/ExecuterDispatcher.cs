@@ -1,4 +1,5 @@
 ﻿using Baibaocp.LotteryVender.Abstractions;
+using Fighting.Extensions.Messaging.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Threading.Tasks;
@@ -12,9 +13,12 @@ namespace Baibaocp.LotteryVender
 
         private readonly ExecuterOptions _options;
 
-        public ExecuterDispatcher(IServiceProvider resolver, ExecuterOptions options)
+        private readonly IMessagePublisher _publisher;
+
+        public ExecuterDispatcher(IServiceProvider resolver, IMessagePublisher publisher, ExecuterOptions options)
         {
             _resolver = resolver;
+            _publisher = publisher;
             _options = options;
         }
 
@@ -34,16 +38,12 @@ namespace Baibaocp.LotteryVender
             {
                 throw new ArgumentNullException(nameof(executer));
             }
-            var executeHandlers = _resolver.GetServices<THandler>();
-            if (executeHandlers == null)
+            var handler = _resolver.GetRequiredService<THandler>();
+            if (handler == null)
             {
                 throw new Exception($"No handler found for executer '{executer.GetType().FullName}'");
             }
-            foreach (var handler in executeHandlers)
-            {
-                return Task.FromResult(handler);
-            }
-            throw new Exception($"No handler support for executer '{executer.GetType().FullName}'");
+            return Task.FromResult(handler); ;
         }
     }
 }
