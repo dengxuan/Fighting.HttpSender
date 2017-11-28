@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Baibaocp.LotteryVender.ShanghaiOrdering.Dispatcher": {
+      "commandName": "Project",
+      "commandLineArgs": " 你好"
+    }
+  }
+}

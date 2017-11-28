@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Baibaocp.Core
+namespace Baibaocp.Core.Entities
 {
     /// <summary>
     /// 彩种玩法

@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Baibaocp.Core
+namespace Baibaocp.Core.Entities
 {
     [Table("BbcpLotteryPlayMappings")]
     public class LotteryPlayMappingEntity :Entity<int>

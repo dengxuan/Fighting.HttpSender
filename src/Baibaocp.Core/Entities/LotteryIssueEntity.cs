@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Baibaocp.Core
+namespace Baibaocp.Core.Entities
 {
     public class LotteryIssueEntity : Entity<int>
     {

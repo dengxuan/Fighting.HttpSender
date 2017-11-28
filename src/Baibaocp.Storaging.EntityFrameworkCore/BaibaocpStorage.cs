@@ -1,4 +1,4 @@
-﻿using Baibaocp.LotterySales.Core.Entities;
+﻿using Baibaocp.LotteryVender.Core.Entities;
 using Fighting.Storaging.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

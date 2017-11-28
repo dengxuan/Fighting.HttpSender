@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Baibaocp.LotteryDispatcher.Shanghai.Abstractions</AssemblyName>
+    <RootNamespace>Baibaocp.LotteryDispatcher.Shanghai</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -13,12 +15,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fighting.Storaging.EntityFrameworkCore" Version="1.0.0" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.0.0.1" />
+    <PackageReference Include="Fighting.Extensions.Threading" Version="1.0.0" />
+    <PackageReference Include="Fighting.Security.Cryptography" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Baibaocp.LotteryVender.Core\Baibaocp.LotteryVender.Core.csproj" />
+    <ProjectReference Include="..\Baibaocp.LotteryDispatcher.Abstractions\Baibaocp.LotteryDispatcher.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>
