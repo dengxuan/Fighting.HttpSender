@@ -1,6 +1,7 @@
-﻿using Baibaocp.LotteryDispatcher.Abstractions;
+﻿using Baibaocp.Core;
+using Baibaocp.LotteryDispatcher.Abstractions;
 using Baibaocp.LotteryDispatcher.Executers;
-using Baibaocp.LotteryDispatcher.Models;
+using Baibaocp.LotteryDispatcher.Models.Results;
 using Fighting.Extensions;
 using System;
 using System.Collections.Generic;
@@ -14,7 +15,7 @@ using System.Xml.Linq;
 namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
 {
     [Handler(LdpVenderId = "800")]
-    public class ShanghaiAwardingExecuteHandler : IExecuteHandler<AwardingExecuter>
+    public class ShanghaiAwardingExecuteHandler : IExecuteHandler<AwardingExecuter, AwardingResult>
     {
         private const string COMMAND = "111";
 
@@ -45,7 +46,7 @@ namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
             return text.ToMd5();
         }
 
-        public async Task<ExecuteResult> HandleAsync(AwardingExecuter command)
+        public async Task<AwardingResult> HandleAsync(AwardingExecuter command)
         {
             var handlerAttribute = typeof(ShanghaiAwardingExecuteHandler).GetCustomAttributes<HandlerAttribute>();
             var attr = handlerAttribute.Where(predicate => predicate.LdpVenderId == command.LdpVenderId).FirstOrDefault();
@@ -72,13 +73,20 @@ namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
                 string msg = Encoding.Default.GetString(bytes);
                 XDocument xml = XDocument.Parse(msg);
                 string Status = xml.Element("ActionResult").Element("xCode").Value;
-                if (Status.Equals("0") || Status.Equals("1"))
+                if (Status.Equals("0"))
                 {
-                    return new ExecuteResult() { VenderId = _options.VenderId };
+                    return new AwardingResult(OrderStatus.Awarding.Winning);
                 }
-                return new ExecuteResult(false);
+                else if (Status.Equals("1"))
+                {
+                    return new AwardingResult(OrderStatus.Awarding.Waiting);
+                }
+                else
+                {
+                    // TODO: Log here and notice to admin
+                }
             }
-            return new ExecuteResult(new ExecuteError());
+            return new AwardingResult(OrderStatus.Awarding.Waiting);
         }
     }
 }

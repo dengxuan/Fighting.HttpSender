@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Baibaocp.LotteryDispatcher.Shanghai.Handlers;
 using Baibaocp.LotteryDispatcher.Shanghai.DependencyInjection;
 using Baibaocp.LotteryDispatcher.Executers;
+using Baibaocp.LotteryDispatcher.Models.Results;
 
 namespace Baibaocp.LotteryDispatcher.Hosting
 {
@@ -22,6 +23,10 @@ namespace Baibaocp.LotteryDispatcher.Hosting
                     services.AddJson();
                     services.AddMessaging(messageBuilder =>
                     {
+                        messageBuilder.AddHandlerDiscovery(discoverySettings =>
+                        {
+                            discoverySettings.MessageHandlerAssemblies.Add(typeof(LotteryVenderServices).Assembly);
+                        });
                         messageBuilder.AddRbbitMQ(options =>
                         {
                             options.VirtualHost = "/";
@@ -32,9 +37,11 @@ namespace Baibaocp.LotteryDispatcher.Hosting
                         }).ConfigureOptions(messageOptions =>
                         {
                             messageOptions.AddConsumer<OrderingMessage>("Ldp.Orders.Dispatcher");
+                            messageOptions.AddConsumer<AwardingMessage>("Ldp.Awards.Dispatcher");
+                            messageOptions.AddConsumer<TicketingMessage>("Ldp.Tickets.Dispatcher");
                         });
                     });
-                    services.AddLotteryVender(builderAction =>
+                    services.AddLotteryDispatcher(builderAction =>
                     {
                         builderAction.AddShanghai(setupOptions =>
                         {
@@ -44,9 +51,10 @@ namespace Baibaocp.LotteryDispatcher.Hosting
                         });
                         builderAction.ConfigureOptions(options =>
                         {
-                            options.AddHandler<ShanghaiOrderingExecuteHandler, OrderingExecuter>("800");
-                            options.AddHandler<ShanghaiAwardingExecuteHandler, AwardingExecuter>("800");
-                            options.AddHandler<ShanghaiTicketingExecuteHandler, TicketingExecuter>("800");
+                            options.AddHandler<ShanghaiOrderingExecuteHandler, OrderingExecuter, OrderingResult>("800");
+                            options.AddHandler<ShanghaiOrderingExecuteHandler, OrderingExecuter, OrderingResult>("900");
+                            options.AddHandler<ShanghaiAwardingExecuteHandler, AwardingExecuter, AwardingResult>("800");
+                            options.AddHandler<ShanghaiTicketingExecuteHandler, TicketingExecuter, TicketingResult>("800");
                         });
                     });
                     services.AddScoped<IHostedService, LotteryVenderServices>();

@@ -1,13 +1,15 @@
-﻿using Baibaocp.Core.Messages;
+﻿using Baibaocp.Core;
+using Baibaocp.Core.Messages;
 using Baibaocp.LotteryDispatcher.Abstractions;
 using Baibaocp.LotteryDispatcher.Executers;
+using Baibaocp.LotteryDispatcher.Models.Results;
 using Fighting.Extensions.Messaging.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Baibaocp.LotteryDispatcher.ShanghaiTicketing.Handlers
 {
-    public class TicketingMessageHandler : IMessageHandler<OrderingMessage>
+    public class TicketingMessageHandler : IMessageHandler<TicketingMessage>
     {
 
         private readonly IMessagePublisher _publisher;
@@ -20,7 +22,7 @@ namespace Baibaocp.LotteryDispatcher.ShanghaiTicketing.Handlers
             _dispatcher = dispatcher;
         }
 
-        public async Task<bool> Handle(OrderingMessage message, CancellationToken token)
+        public async Task<bool> Handle(TicketingMessage message, CancellationToken token)
         {
             if (!token.IsCancellationRequested)
             {
@@ -28,18 +30,29 @@ namespace Baibaocp.LotteryDispatcher.ShanghaiTicketing.Handlers
                 {
                     OrderId = message.OrderId,
                 };
-                var executeResult = await _dispatcher.DispatchAsync(executer);
+                var executeResult = await _dispatcher.DispatchAsync<TicketingExecuter, TicketingResult>(executer);
                 if (executeResult.Success)
                 {
-                    message.LdpVenderId = executeResult.VenderId;
-                    message.Status = 1;
+                    AwardingMessage ticketedMessage = new AwardingMessage
+                    {
+                        OrderId = message.OrderId,
+                        LvpOrderId = message.LvpOrderId,
+                        LvpVenderId = message.LvpVenderId,
+                        LdpVenderId = message.LdpVenderId,
+                        TicketOdds = executeResult.Result.TicketOdds,
+                        AwardStatus = executeResult.Result.Code
+                    };
+                    if (executeResult.Result.Code == OrderStatus.Ticketing.Success)
+                    {
+                        await _publisher.Publish(RoutingkeyConsts.Tickets.Completed.Success, ticketedMessage, token);
+                        return true;
+                    }
+                    else if (executeResult.Result.Code == OrderStatus.Ticketing.Failure)
+                    {
+                        await _publisher.Publish(RoutingkeyConsts.Tickets.Completed.Failure, ticketedMessage, token);
+                        return true;
+                    }
                 }
-                else
-                {
-                    message.Status = 0;
-                }
-                await _publisher.Publish(executeResult.Success ? "Awards.Completed.Success" : "Tickets.Completed.Failure", message, token);
-                return true;
             }
             return false;
         }

@@ -7,7 +7,7 @@ namespace Baibaocp.LotteryDispatcher.DependencyInjection
 {
     public static class LotteryVenderIServiceCollectionExtensions
     {
-        public static IServiceCollection AddLotteryVender(this IServiceCollection services, Action<LotteryDispatcherBuilder> builderAction)
+        public static IServiceCollection AddLotteryDispatcher(this IServiceCollection services, Action<LotteryDispatcherBuilder> builderAction)
         {
             if (services == null)
             {

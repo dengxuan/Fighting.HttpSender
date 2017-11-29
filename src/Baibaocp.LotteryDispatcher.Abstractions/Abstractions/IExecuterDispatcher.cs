@@ -4,6 +4,6 @@ namespace Baibaocp.LotteryDispatcher.Abstractions
 {
     public interface IExecuterDispatcher
     {
-        Task<ExecuteResult> DispatchAsync<TExecuter>(TExecuter executer) where TExecuter : IExecuter;
+        Task<ExecuteResult<TResult>> DispatchAsync<TExecuter, TResult>(TExecuter executer) where TExecuter : IExecuter where TResult: IResult;
     }
 }

@@ -1,4 +1,5 @@
-﻿using Baibaocp.Core.Messages;
+﻿using Baibaocp.Core;
+using Baibaocp.Core.Messages;
 using Baibaocp.LotteryVender.Core.Entities;
 using Baibaocp.LotteryVender.WebApi.Entity;
 using Baibaocp.LotteryVender.WebApi.Models;
@@ -107,7 +108,7 @@ namespace Baibaocp.LotteryVender.WebApi.Controllers
                     InvestAmount = order.InvestAmount,
                     CreationTime = DateTime.Now
                 };
-                await _messagePublisher.Publish("Orders.Accepted.Success", message, CancellationToken.None);
+                await _messagePublisher.Publish(RoutingkeyConsts.Orders.Accepted.PrivateVender.Hongdan, message, CancellationToken.None);
             }
         }
     }

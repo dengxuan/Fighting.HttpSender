@@ -1,6 +1,7 @@
 ﻿using Baibaocp.LotteryDispatcher.Abstractions;
 using Baibaocp.LotteryDispatcher.Executers;
-using Baibaocp.LotteryDispatcher.Models;
+using Baibaocp.LotteryVender.Shanghai.Extensions;
+using Baibaocp.LotteryDispatcher.Models.Results;
 using Fighting.Extensions;
 using System;
 using System.Collections.Generic;
@@ -8,10 +9,11 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Baibaocp.Core;
 
 namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
 {
-    public class ShanghaiOrderingExecuteHandler : IExecuteHandler<OrderingExecuter>
+    public class ShanghaiOrderingExecuteHandler : IExecuteHandler<OrderingExecuter, OrderingResult>
     {
         private readonly HttpClient _httpClient;
         private readonly ShanghaiDispatcherOptions _options;
@@ -41,15 +43,15 @@ namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
             return text.ToMd5();
         }
 
-        public async Task<ExecuteResult> HandleAsync(OrderingExecuter command)
+        public async Task<OrderingResult> HandleAsync(OrderingExecuter command)
         {
             string[] values = new string[]
             {
                     string.Format("OrderID={0}", command.OrderId),
-                    string.Format("LotID={0}", command.LotteryId),
+                    string.Format("LotID={0}", command.LotteryId.ToLottery()),
                     string.Format("LotIssue={0}", command.IssueNumber),
                     string.Format("LotMoney={0}", command.InvestAmount/100),
-                    string.Format("LotCode={0}", command.InvestCode),
+                    string.Format("LotCode={0}", command.InvestCode.ToCastcode(command.LotteryPlayId)),
                     string.Format("LotMulti={0}", command.InvestTimes),
                     string.Format("Attach={0}", ""),
                     string.Format("OneMoney={0}", command.InvestType == false ? "2":"3")
@@ -72,13 +74,16 @@ namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
                 string msg = Encoding.Default.GetString(bytes);
                 XDocument xml = XDocument.Parse(msg);
                 string Status = xml.Element("ActionResult").Element("xCode").Value;
-                if (Status.Equals("0") || Status.Equals("1"))
+                if (Status.Equals("0") || Status.Equals("1") || Status.Equals("1008"))
                 {
-                    return new ExecuteResult() { VenderId = _options.VenderId };
+                    return new OrderingResult(OrderStatus.Ordering.Success);
                 }
-                return new ExecuteResult(false);
+                else
+                {
+                    // TODO: Log here and notice to admin
+                }
             }
-            return new ExecuteResult(new ExecuteError());
+            return new OrderingResult(OrderStatus.Ordering.Failure);
         }
     }
 }

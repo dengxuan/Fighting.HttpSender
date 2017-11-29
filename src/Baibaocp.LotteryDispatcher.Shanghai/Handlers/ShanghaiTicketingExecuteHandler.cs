@@ -1,6 +1,8 @@
-﻿using Baibaocp.LotteryDispatcher.Abstractions;
+﻿using Baibaocp.Core;
+using Baibaocp.LotteryDispatcher.Abstractions;
 using Baibaocp.LotteryDispatcher.Executers;
 using Baibaocp.LotteryDispatcher.Models;
+using Baibaocp.LotteryDispatcher.Models.Results;
 using Fighting.Extensions;
 using System;
 using System.Collections.Generic;
@@ -11,7 +13,7 @@ using System.Xml.Linq;
 
 namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
 {
-    public class ShanghaiTicketingExecuteHandler : IExecuteHandler<TicketingExecuter>
+    public class ShanghaiTicketingExecuteHandler : IExecuteHandler<TicketingExecuter, TicketingResult>
     {
         private const string COMMAND = "102";
 
@@ -42,7 +44,7 @@ namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
             return text.ToMd5();
         }
 
-        public async Task<ExecuteResult> HandleAsync(TicketingExecuter command)
+        public async Task<TicketingResult> HandleAsync(TicketingExecuter command)
         {
             string[] values = new string[]
             {
@@ -66,13 +68,20 @@ namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
                 string msg = Encoding.Default.GetString(bytes);
                 XDocument xml = XDocument.Parse(msg);
                 string Status = xml.Element("ActionResult").Element("xCode").Value;
-                if (Status.Equals("0") || Status.Equals("1"))
+                if (Status.Equals("1"))
                 {
-                    return new ExecuteResult() { VenderId = _options.VenderId };
+                    return new TicketingResult(OrderStatus.Ticketing.Success);
                 }
-                return new ExecuteResult(false);
+                else if (Status.Equals("2003"))
+                {
+                    return new TicketingResult(OrderStatus.Ticketing.Failure);
+                }
+                else
+                {
+                    // TODO: Log here and notice to admin
+                }
             }
-            return new ExecuteResult(new ExecuteError());
+            return new TicketingResult(OrderStatus.Ticketing.Waiting);
         }
     }
 }

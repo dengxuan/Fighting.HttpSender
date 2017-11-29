@@ -1,15 +1,13 @@
-﻿using Baibaocp.LotteryDispatcher.Models;
-
-namespace Baibaocp.LotteryDispatcher.Abstractions
+﻿namespace Baibaocp.LotteryDispatcher.Abstractions
 {
-    public class ExecuteResult
+    public class ExecuteResult<TResult> where TResult : IResult
     {
 
         public bool Success { get; set; }
 
         public string VenderId { get; set; }
 
-        public ExecuteError Error { get; set; }
+        public TResult Result { get; set; }
 
         public ExecuteResult()
         {
@@ -21,10 +19,10 @@ namespace Baibaocp.LotteryDispatcher.Abstractions
             Success = success;
         }
 
-        public ExecuteResult(ExecuteError error)
+        public ExecuteResult(TResult result)
         {
-            Error = error;
-            Success = false;
+            Result = result;
+            Success = true;
         }
     }
 }

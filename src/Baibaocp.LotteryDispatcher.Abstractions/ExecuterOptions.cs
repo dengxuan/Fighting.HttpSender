@@ -8,21 +8,22 @@ namespace Baibaocp.LotteryDispatcher
 {
     public class ExecuterOptions
     {
-        private readonly ConcurrentDictionary<string, ISet<Type>> _lvpHandlerTypesMapping = new ConcurrentDictionary<string, ISet<Type>>();
+        private readonly ConcurrentDictionary<(string ldpVenderId, Type executerType), Type> _ldpHandlerTypesMapping = new ConcurrentDictionary<(string ldpVenderId, Type executerType), Type>();
 
-        public void AddHandler<THandler, TExecuter>(string lvpVenderId) where THandler : IExecuteHandler<TExecuter> where TExecuter : IExecuter
+        public void AddHandler<THandler, TExecuter, TResult>(string ldpVenderId) where THandler : IExecuteHandler<TExecuter, TResult> where TExecuter : IExecuter where TResult : IResult
         {
-            ISet<Type> types = _lvpHandlerTypesMapping.GetOrAdd(lvpVenderId, (key) =>
-            {
-                return new HashSet<Type>();
-            });
-            types.Add(typeof(THandler));
+            _ldpHandlerTypesMapping.TryAdd((ldpVenderId, typeof(TExecuter)), typeof(THandler));
         }
 
-        internal IReadOnlyList<Type> GetHandlerTypes(string lvpVenderId)
+        internal Type GetHandler<TExecuter>(string ldpVenderId)
         {
-            _lvpHandlerTypesMapping.TryGetValue(lvpVenderId, out ISet<Type> value);
-            return value.ToList();
+            _ldpHandlerTypesMapping.TryGetValue((ldpVenderId, typeof(TExecuter)), out Type value);
+            return value;
+        }
+
+        internal List<string> GetLdpVenderId<TExecuter>()
+        {
+            return _ldpHandlerTypesMapping.Keys.Where(predicate => predicate.executerType == typeof(TExecuter)).Select(selector => selector.ldpVenderId).ToList();
         }
     }
 }

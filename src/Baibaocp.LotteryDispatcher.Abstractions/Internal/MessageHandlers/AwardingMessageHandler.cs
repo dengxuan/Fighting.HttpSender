@@ -1,13 +1,15 @@
-﻿using Baibaocp.Core.Messages;
+﻿using Baibaocp.Core;
+using Baibaocp.Core.Messages;
 using Baibaocp.LotteryDispatcher.Abstractions;
 using Baibaocp.LotteryDispatcher.Executers;
+using Baibaocp.LotteryDispatcher.Models.Results;
 using Fighting.Extensions.Messaging.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
 
 namespace Baibaocp.LotteryDispatcher.ShanghaiAwarding.Handlers
 {
-    public class AwardingMessageHandler : IMessageHandler<OrderingMessage>
+    public class AwardingMessageHandler : IMessageHandler<AwardingMessage>
     {
 
         private readonly IMessagePublisher _publisher;
@@ -20,7 +22,7 @@ namespace Baibaocp.LotteryDispatcher.ShanghaiAwarding.Handlers
             _dispatcher = dispatcher;
         }
 
-        public async Task<bool> Handle(OrderingMessage message, CancellationToken token)
+        public async Task<bool> Handle(AwardingMessage message, CancellationToken token)
         {
             if (!token.IsCancellationRequested)
             {
@@ -28,18 +30,22 @@ namespace Baibaocp.LotteryDispatcher.ShanghaiAwarding.Handlers
                 {
                     OrderId = message.OrderId,
                 };
-                var executeResult = await _dispatcher.DispatchAsync(executer);
+                var executeResult = await _dispatcher.DispatchAsync<AwardingExecuter, AwardingResult>(executer);
                 if (executeResult.Success)
                 {
-                    message.LdpVenderId = executeResult.VenderId;
-                    message.Status = 1;
+                    message.AwardStatus = executeResult.Result.Code;
+                    message.Amount = executeResult.Result.Amount ?? 0;
+                    if (executeResult.Result.Code == OrderStatus.Awarding.Winning)
+                    {
+                        await _publisher.Publish(RoutingkeyConsts.Awards.Completed.Winning, message, token);
+                        return true;
+                    }
+                    else if (executeResult.Result.Code == OrderStatus.Awarding.Loseing)
+                    {
+                        await _publisher.Publish(RoutingkeyConsts.Awards.Completed.Loseing, message, token);
+                        return true;
+                    }
                 }
-                else
-                {
-                    message.Status = 0;
-                }
-                await _publisher.Publish(executeResult.Success ? "Awards.Completed.Success" : "Tickets.Completed.Failure", message, token);
-                return true;
             }
             return false;
         }

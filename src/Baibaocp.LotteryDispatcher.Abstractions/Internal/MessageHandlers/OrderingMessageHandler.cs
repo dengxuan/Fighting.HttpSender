@@ -1,6 +1,8 @@
-﻿using Baibaocp.Core.Messages;
+﻿using Baibaocp.Core;
+using Baibaocp.Core.Messages;
 using Baibaocp.LotteryDispatcher.Abstractions;
 using Baibaocp.LotteryDispatcher.Executers;
+using Baibaocp.LotteryDispatcher.Models.Results;
 using Fighting.Extensions.Messaging.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,18 +38,28 @@ namespace Baibaocp.LotteryDispatcher.Internal.MessageHandlers
                     LotteryId = message.LotteryId,
                     LotteryPlayId = message.LotteryPlayId
                 };
-                var executeResult = await _dispatcher.DispatchAsync(executer);
+                var executeResult = await _dispatcher.DispatchAsync<OrderingExecuter, OrderingResult>(executer);
                 if (executeResult.Success)
                 {
-                    message.LdpVenderId = executeResult.VenderId;
-                    message.Status = 1;
+                    TicketingMessage ticketingMessage = new TicketingMessage
+                    {
+                        OrderId = message.OrderId,
+                        LvpOrderId = message.LvpOrderId,
+                        LvpVenderId = message.LvpVenderId,
+                        LdpVenderId = executeResult.VenderId,
+                        TicketStatus = executeResult.Result.Code
+                    };
+                    if (executeResult.Result.Code == OrderStatus.Ordering.Success)
+                    {
+                        await _publisher.Publish(RoutingkeyConsts.Orders.Completed.Success, ticketingMessage, token);
+                        return true;
+                    }
+                    else if (executeResult.Result.Code == OrderStatus.Ordering.Failure)
+                    {
+                        await _publisher.Publish(RoutingkeyConsts.Orders.Completed.Failure, ticketingMessage, token);
+                        return true;
+                    }
                 }
-                else
-                {
-                    message.Status = 0;
-                }
-                await _publisher.Publish(executeResult.Success ? "Tickets.Completed.Success" : "Tickets.Completed.Failure", message, token);
-                return true;
             }
             return false;
         }

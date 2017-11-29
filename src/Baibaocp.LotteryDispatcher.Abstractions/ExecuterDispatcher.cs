@@ -1,6 +1,8 @@
 ﻿using Baibaocp.LotteryDispatcher.Abstractions;
+using Baibaocp.LotteryDispatcher.Models;
 using Fighting.Extensions.Messaging.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
@@ -8,6 +10,7 @@ namespace Baibaocp.LotteryDispatcher
 {
     public class ExecuterDispatcher : IExecuterDispatcher
     {
+        private readonly ILogger _logger;
 
         private readonly IServiceProvider _resolver;
 
@@ -15,47 +18,39 @@ namespace Baibaocp.LotteryDispatcher
 
         private readonly IMessagePublisher _publisher;
 
-        public ExecuterDispatcher(IServiceProvider resolver, IMessagePublisher publisher, ExecuterOptions options)
+        public ExecuterDispatcher(IServiceProvider resolver, IMessagePublisher publisher, ExecuterOptions options, ILogger<ExecuterDispatcher> logger)
         {
             _resolver = resolver;
             _publisher = publisher;
             _options = options;
+            _logger = logger;
         }
 
 
-        public async Task<ExecuteResult> DispatchAsync<TExecuter>(TExecuter executer) where TExecuter : IExecuter
+        public async Task<ExecuteResult<TResult>> DispatchAsync<TExecuter, TResult>(TExecuter executer) where TExecuter : IExecuter where TResult : IResult
         {
-            var handlerTypes = _options.GetHandlerTypes(executer.LvpVenderId);
-            foreach (var handlerType in handlerTypes)
+            try
             {
-                var handler = await GetHandlerAsync<TExecuter>(handlerType);
-                var result = await handler.HandleAsync(executer);
-                if (result.Success)
+                var ldpVenderIds = _options.GetLdpVenderId<TExecuter>();
+                foreach (var ldpVenderId in ldpVenderIds)
                 {
-                    return result;
+                    var handlerType = _options.GetHandler<TExecuter>(ldpVenderId);
+                    var handler = await GetHandlerAsync<TExecuter, TResult>(handlerType);
+                    var result = await handler.HandleAsync(executer);
+                    return new ExecuteResult<TResult>(result) { VenderId = ldpVenderId };
                 }
+                return new ExecuteResult<TResult>(false);
             }
-
-            return new ExecuteResult(false);
+            catch (Exception ex)
+            {
+                _logger.LogError("Dispatcher error : {0}", ex);
+                return new ExecuteResult<TResult>(false);
+            }
         }
 
-        private Task<THandler> GetHandlerAsync<THandler, TExecuter>(TExecuter executer) where THandler : IExecuteHandler<TExecuter> where TExecuter : IExecuter
+        private Task<IExecuteHandler<TExecuter, TResult>> GetHandlerAsync<TExecuter, TResult>(Type handlerType) where TExecuter : IExecuter where TResult : IResult
         {
-            if (executer == null)
-            {
-                throw new ArgumentNullException(nameof(executer));
-            }
-            var handler = _resolver.GetRequiredService<THandler>();
-            if (handler == null)
-            {
-                throw new Exception($"No handler found for executer '{executer.GetType().FullName}'");
-            }
-            return Task.FromResult(handler); ;
-        }
-
-        private Task<IExecuteHandler<TExecuter>> GetHandlerAsync<TExecuter>(Type handlerType) where TExecuter : IExecuter
-        {
-            var handler = (IExecuteHandler<TExecuter>)_resolver.GetRequiredService(handlerType);
+            var handler = (IExecuteHandler<TExecuter, TResult>)_resolver.GetRequiredService(handlerType);
             if (handler == null)
             {
                 throw new Exception($"No handler found '{handlerType.FullName}'");
