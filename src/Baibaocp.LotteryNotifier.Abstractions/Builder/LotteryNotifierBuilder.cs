@@ -1,23 +1,20 @@
-﻿using Baibaocp.LotteryDispatcher.Abstractions;
+﻿using Baibaocp.LotteryNotifier.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text;
 
-namespace Baibaocp.LotteryDispatcher.Builder
+namespace Baibaocp.LotteryNotifier.Builder
 {
-    public class LotteryDispatcherBuilder
+    public class LotteryNotifierBuilder
     {
         private readonly DiscoverySettings _discoverySettings = new DiscoverySettings();
 
         public IServiceCollection Services { get; }
 
-        internal LotteryDispatcherBuilder(IServiceCollection services)
+        internal LotteryNotifierBuilder(IServiceCollection services)
         {
             Services = services;
         }
@@ -27,20 +24,20 @@ namespace Baibaocp.LotteryDispatcher.Builder
             Services.Scan(s =>
             {
                 s.FromApplicationDependencies()
-                .AddClasses(f => f.AssignableTo(typeof(IExecuteHandler<,>)), !_discoverySettings.IncludeNonPublic)
+                .AddClasses(f => f.AssignableTo(typeof(INoticeHandler<>)), !_discoverySettings.IncludeNonPublic)
                 .UsingRegistrationStrategy(_discoverySettings.RegistrationStrategy)
                 .AsSelf()
                 .WithLifetime(_discoverySettings.DiscoveredHandlersLifetime);
             });
         }
 
-        public LotteryDispatcherBuilder ConfigureOptions(Action<LotteryDispatcherOptions> options)
+        public LotteryNotifierBuilder ConfigureOptions(Action<LotteryNoticeOptions> options)
         {
             Services.Configure(options);
             return this;
         }
 
-        public LotteryDispatcherBuilder AddHandlerDiscovery(Action<DiscoverySettings> discoverySettings)
+        public LotteryNotifierBuilder AddHandlerDiscovery(Action<DiscoverySettings> discoverySettings)
         {
             discoverySettings(_discoverySettings);
             return this;
@@ -48,8 +45,8 @@ namespace Baibaocp.LotteryDispatcher.Builder
 
         internal void Build()
         {
-            Services.TryAddEnumerable(ServiceDescriptor.Transient<IConfigureOptions<LotteryDispatcherOptions>, DefaultLotteryDispatcherOptionsSetup>());
-            Services.AddSingleton(c => c.GetRequiredService<IOptions<LotteryDispatcherOptions>>().Value);
+            Services.TryAddEnumerable(ServiceDescriptor.Transient<IConfigureOptions<LotteryNoticeOptions>, DefaultLotteryNoticeOptionsSetup>());
+            Services.AddSingleton(c => c.GetRequiredService<IOptions<LotteryNoticeOptions>>().Value);
             AddHandlerDiscovery();
         }
     }

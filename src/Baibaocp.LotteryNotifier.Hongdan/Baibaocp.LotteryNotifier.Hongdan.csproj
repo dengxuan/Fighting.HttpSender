@@ -13,13 +13,10 @@
     <PackageReference Include="Fighting.Extensions.Messaging.RabbitMQ" Version="1.0.0" />
     <PackageReference Include="Fighting.Extensions.Serialization.Json" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.0-preview1-27654" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Baibaocp.LotteryDispatcher.Shanghai.Abstractions\Baibaocp.LotteryDispatcher.Shanghai.Abstractions.csproj" />
-    <ProjectReference Include="..\Baibaocp.LotteryDispatcher.Shanghai\Baibaocp.LotteryDispatcher.Shanghai.csproj" />
+    <ProjectReference Include="..\Baibaocp.LotteryNotifier.Abstractions\Baibaocp.LotteryNotifier.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

@@ -3,7 +3,7 @@ using Scrutor;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Baibaocp.LotteryDispatcher.Builder
+namespace Baibaocp.LotteryNotifier.Builder
 {
     /// <summary>
     /// Type discovery settings

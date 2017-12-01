@@ -8,8 +8,6 @@ namespace Baibaocp.LotteryDispatcher.Shanghai
     {
         public string Url { get; set; }
 
-        public string VenderId { get; set; }
-
         public string SecretKey { get; set; }
     }
 }

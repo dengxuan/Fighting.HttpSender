@@ -3,14 +3,14 @@ using Microsoft.Extensions.Hosting;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Baibaocp.LotteryDispatcher
+namespace Baibaocp.LotteryNotifier
 {
-    public class LotteryVenderServices : BackgroundService
+    public class LotteryNotifierServices : BackgroundService
     {
 
         private readonly IRawMessageHandlerSubscriber _handlerSubscriber;
 
-        public LotteryVenderServices(IRawMessageHandler messageHandler, IRawMessageHandlerSubscriber handlerSubscriber)
+        public LotteryNotifierServices(IRawMessageHandler messageHandler, IRawMessageHandlerSubscriber handlerSubscriber)
         {
             _handlerSubscriber = handlerSubscriber;
         }

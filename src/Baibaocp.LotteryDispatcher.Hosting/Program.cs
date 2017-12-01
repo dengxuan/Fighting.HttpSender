@@ -10,6 +10,7 @@ using Baibaocp.LotteryDispatcher.Shanghai.Handlers;
 using Baibaocp.LotteryDispatcher.Shanghai.DependencyInjection;
 using Baibaocp.LotteryDispatcher.Executers;
 using Baibaocp.LotteryDispatcher.Models.Results;
+using Microsoft.Extensions.Logging;
 
 namespace Baibaocp.LotteryDispatcher.Hosting
 {
@@ -25,7 +26,7 @@ namespace Baibaocp.LotteryDispatcher.Hosting
                     {
                         messageBuilder.AddHandlerDiscovery(discoverySettings =>
                         {
-                            discoverySettings.MessageHandlerAssemblies.Add(typeof(LotteryVenderServices).Assembly);
+                            discoverySettings.MessageHandlerAssemblies.Add(typeof(LotteryDispatcherServices).Assembly);
                         });
                         messageBuilder.AddRbbitMQ(options =>
                         {
@@ -47,7 +48,6 @@ namespace Baibaocp.LotteryDispatcher.Hosting
                         {
                             setupOptions.SecretKey = "ourpartner";
                             setupOptions.Url = "http://115.29.193.120/";
-                            setupOptions.VenderId = "800";
                         });
                         builderAction.ConfigureOptions(options =>
                         {
@@ -57,9 +57,9 @@ namespace Baibaocp.LotteryDispatcher.Hosting
                             options.AddHandler<ShanghaiTicketingExecuteHandler, TicketingExecuter, TicketingResult>("800");
                         });
                     });
-                    services.AddScoped<IHostedService, LotteryVenderServices>();
+                    services.AddScoped<IHostedService, LotteryDispatcherServices>();
                 });
-
+            host.ConfigureLogging(configureLogging => configureLogging.ClearProviders().AddConsole().AddDebug().SetMinimumLevel(LogLevel.Critical));
             await host.RunConsoleAsync();
         }
     }

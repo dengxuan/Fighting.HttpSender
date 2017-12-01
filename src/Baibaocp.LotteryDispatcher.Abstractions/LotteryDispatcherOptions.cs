@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace Baibaocp.LotteryDispatcher
 {
-    public class ExecuterOptions
+    public class LotteryDispatcherOptions
     {
         private readonly ConcurrentDictionary<(string ldpVenderId, Type executerType), Type> _ldpHandlerTypesMapping = new ConcurrentDictionary<(string ldpVenderId, Type executerType), Type>();
 

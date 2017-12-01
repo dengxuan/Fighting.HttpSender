@@ -1,5 +1,4 @@
 ﻿using Baibaocp.LotteryDispatcher.Abstractions;
-using Baibaocp.LotteryDispatcher.Models;
 using Fighting.Extensions.Messaging.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -14,11 +13,11 @@ namespace Baibaocp.LotteryDispatcher
 
         private readonly IServiceProvider _resolver;
 
-        private readonly ExecuterOptions _options;
+        private readonly LotteryDispatcherOptions _options;
 
         private readonly IMessagePublisher _publisher;
 
-        public ExecuterDispatcher(IServiceProvider resolver, IMessagePublisher publisher, ExecuterOptions options, ILogger<ExecuterDispatcher> logger)
+        public ExecuterDispatcher(IServiceProvider resolver, IMessagePublisher publisher, LotteryDispatcherOptions options, ILogger<ExecuterDispatcher> logger)
         {
             _resolver = resolver;
             _publisher = publisher;

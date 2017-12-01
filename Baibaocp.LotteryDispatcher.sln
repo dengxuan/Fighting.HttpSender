@@ -25,9 +25,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Baibaocp.LotteryVender.WebA
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LotteryNotifier", "LotteryNotifier", "{589CB699-0FF4-462E-8EDF-A3615691DE63}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Baibaocp.LotteryDispatcher.Shanghai", "src\Baibaocp.LotteryDispatcher.Shanghai\Baibaocp.LotteryDispatcher.Shanghai.csproj", "{4ADF2526-66DE-45BA-A8DF-8D90DB680A6C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Baibaocp.LotteryDispatcher.Shanghai", "src\Baibaocp.LotteryDispatcher.Shanghai\Baibaocp.LotteryDispatcher.Shanghai.csproj", "{4ADF2526-66DE-45BA-A8DF-8D90DB680A6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Baibaocp.LotteryDispatcher.Hosting", "src\Baibaocp.LotteryDispatcher.Hosting\Baibaocp.LotteryDispatcher.Hosting.csproj", "{8CE8FF03-D98C-487E-BBDA-B3322B68BD4E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Baibaocp.LotteryDispatcher.Hosting", "src\Baibaocp.LotteryDispatcher.Hosting\Baibaocp.LotteryDispatcher.Hosting.csproj", "{8CE8FF03-D98C-487E-BBDA-B3322B68BD4E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Baibaocp.LotteryNotifier.Abstractions", "src\Baibaocp.LotteryNotifier.Abstractions\Baibaocp.LotteryNotifier.Abstractions.csproj", "{95D559C3-26A1-436E-B577-B8AC52CF6EB3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Baibaocp.LotteryNotifier.Hongdan", "src\Baibaocp.LotteryNotifier.Hongdan\Baibaocp.LotteryNotifier.Hongdan.csproj", "{617D9027-57B9-44FC-BCE1-AEF9E648EDB1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +71,14 @@ Global
 		{8CE8FF03-D98C-487E-BBDA-B3322B68BD4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CE8FF03-D98C-487E-BBDA-B3322B68BD4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CE8FF03-D98C-487E-BBDA-B3322B68BD4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95D559C3-26A1-436E-B577-B8AC52CF6EB3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95D559C3-26A1-436E-B577-B8AC52CF6EB3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95D559C3-26A1-436E-B577-B8AC52CF6EB3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95D559C3-26A1-436E-B577-B8AC52CF6EB3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{617D9027-57B9-44FC-BCE1-AEF9E648EDB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{617D9027-57B9-44FC-BCE1-AEF9E648EDB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{617D9027-57B9-44FC-BCE1-AEF9E648EDB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{617D9027-57B9-44FC-BCE1-AEF9E648EDB1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,6 +95,8 @@ Global
 		{589CB699-0FF4-462E-8EDF-A3615691DE63} = {1A21A87C-1C11-43B1-8840-145492C04302}
 		{4ADF2526-66DE-45BA-A8DF-8D90DB680A6C} = {879CA4FA-34B2-463B-92D3-DCD011099569}
 		{8CE8FF03-D98C-487E-BBDA-B3322B68BD4E} = {879CA4FA-34B2-463B-92D3-DCD011099569}
+		{95D559C3-26A1-436E-B577-B8AC52CF6EB3} = {589CB699-0FF4-462E-8EDF-A3615691DE63}
+		{617D9027-57B9-44FC-BCE1-AEF9E648EDB1} = {589CB699-0FF4-462E-8EDF-A3615691DE63}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BEB9354B-B06D-42A8-824B-8B30FA1C070D}
