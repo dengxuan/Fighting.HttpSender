@@ -2,8 +2,10 @@
 using Baibaocp.LotteryNotifier.DependencyInjection;
 using Fighting.Extensions.Messaging.DependencyInjection;
 using Fighting.Extensions.Serialization.Json.DependencyInjection;
+using Fighting.Security.Cryptography;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Baibaocp.LotteryNotifier.Hongdan

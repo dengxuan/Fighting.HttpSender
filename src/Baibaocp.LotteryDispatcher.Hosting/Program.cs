@@ -11,6 +11,8 @@ using Baibaocp.LotteryDispatcher.Shanghai.DependencyInjection;
 using Baibaocp.LotteryDispatcher.Executers;
 using Baibaocp.LotteryDispatcher.Models.Results;
 using Microsoft.Extensions.Logging;
+using Fighting.Extensions.Caching.DependencyInjection;
+using Fighting.Extensions.Caching.Redis.DependencyInjection;
 
 namespace Baibaocp.LotteryDispatcher.Hosting
 {
@@ -22,6 +24,14 @@ namespace Baibaocp.LotteryDispatcher.Hosting
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddJson();
+                    services.AddCaching(cacheBuilder => 
+                    {
+                        cacheBuilder.AddRedis(options =>
+                        {
+                            options.DatabaseId = 10;
+                            options.ConnectionString = "192.168.1.21:6379,password=zf8Mjjo6rLKDzf81";
+                        });
+                    });
                     services.AddMessaging(messageBuilder =>
                     {
                         messageBuilder.AddHandlerDiscovery(discoverySettings =>

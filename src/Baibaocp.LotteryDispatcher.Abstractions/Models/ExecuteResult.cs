@@ -5,8 +5,6 @@
 
         public bool Success { get; set; }
 
-        public string VenderId { get; set; }
-
         public TResult Result { get; set; }
 
         public ExecuteResult()

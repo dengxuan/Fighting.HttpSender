@@ -3,6 +3,7 @@ using Baibaocp.Core.Messages;
 using Baibaocp.LotteryDispatcher.Abstractions;
 using Baibaocp.LotteryDispatcher.Executers;
 using Baibaocp.LotteryDispatcher.Models.Results;
+using Fighting.Extensions.Caching.Abstractions;
 using Fighting.Extensions.Messaging.Abstractions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,8 +17,17 @@ namespace Baibaocp.LotteryDispatcher.Internal.MessageHandlers
 
         private readonly IExecuterDispatcher _dispatcher;
 
-        public OrderingMessageHandler(IMessagePublisher publisher, IExecuterDispatcher dispatcher)
+        private readonly ICache _issueNumberCache;
+
+        private readonly ICache _sportsEventCache;
+
+        private readonly ICache _loggeryVenderMappingCache;
+
+        public OrderingMessageHandler(ICacheManager cacheManager, IMessagePublisher publisher, IExecuterDispatcher dispatcher)
         {
+            _issueNumberCache = cacheManager.GetCache("IssueNumbers");
+            _sportsEventCache = cacheManager.GetCache("SportsEvents");
+            _loggeryVenderMappingCache = cacheManager.GetCache("LotteryVenderMappings");
             _publisher = publisher;
             _dispatcher = dispatcher;
         }
@@ -26,7 +36,9 @@ namespace Baibaocp.LotteryDispatcher.Internal.MessageHandlers
         {
             if (!token.IsCancellationRequested)
             {
-                OrderingExecuter executer = new OrderingExecuter(message.LvpVenderId, message.LdpVenderId)
+                var ldpVenderId = await _loggeryVenderMappingCache.GetAsync($"{message.LvpVenderId}-{message.LotteryId}", (key) => { return "800"; });
+
+                OrderingExecuter executer = new OrderingExecuter(message.LvpVenderId, ldpVenderId)
                 {
                     OrderId = message.OrderId,
                     InvestAmount = message.InvestAmount,
@@ -46,7 +58,7 @@ namespace Baibaocp.LotteryDispatcher.Internal.MessageHandlers
                         OrderId = message.OrderId,
                         LvpOrderId = message.LvpOrderId,
                         LvpVenderId = message.LvpVenderId,
-                        LdpVenderId = executeResult.VenderId,
+                        LdpVenderId = ldpVenderId,
                         TicketStatus = executeResult.Result.Code
                     };
                     if (executeResult.Result.Code == OrderStatus.Ordering.Success)

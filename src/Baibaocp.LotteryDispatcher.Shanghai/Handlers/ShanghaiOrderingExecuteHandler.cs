@@ -39,12 +39,14 @@ namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
             {
                 return new OrderingResult(OrderStatus.Ordering.Success);
             }
-            else
+            else if(Status.Equals("1003") || Status.Equals("1004"))
             {
                 // TODO: Log here and notice to admin
                 _logger.LogWarning("Response message {0}", document.ToString(SaveOptions.DisableFormatting | SaveOptions.OmitDuplicateNamespaces));
+                return new OrderingResult(OrderStatus.Ordering.Waiting);
             }
-            return new OrderingResult(OrderStatus.Ordering.Waiting);
+            _logger.LogError("Response message {0}", document.ToString(SaveOptions.DisableFormatting | SaveOptions.OmitDuplicateNamespaces));
+            return new OrderingResult(OrderStatus.Ordering.Failure);
         }
     }
 }

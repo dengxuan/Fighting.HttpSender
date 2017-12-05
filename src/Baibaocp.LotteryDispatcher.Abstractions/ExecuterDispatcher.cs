@@ -30,15 +30,10 @@ namespace Baibaocp.LotteryDispatcher
         {
             try
             {
-                var ldpVenderIds = _options.GetLdpVenderId<TExecuter>();
-                foreach (var ldpVenderId in ldpVenderIds)
-                {
-                    var handlerType = _options.GetHandler<TExecuter>(ldpVenderId);
-                    var handler = await GetHandlerAsync<TExecuter, TResult>(handlerType);
-                    var result = await handler.HandleAsync(executer);
-                    return new ExecuteResult<TResult>(result) { VenderId = ldpVenderId };
-                }
-                return new ExecuteResult<TResult>(false);
+                var handlerType = _options.GetHandler<TExecuter>(executer.LdpVenderId);
+                var handler = await GetHandlerAsync<TExecuter, TResult>(handlerType);
+                var result = await handler.HandleAsync(executer);
+                return new ExecuteResult<TResult>(result);
             }
             catch (Exception ex)
             {
