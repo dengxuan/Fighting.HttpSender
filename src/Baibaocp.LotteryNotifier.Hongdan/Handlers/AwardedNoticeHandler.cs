@@ -1,5 +1,7 @@
 ﻿using Baibaocp.LotteryNotifier.Abstractions;
 using Baibaocp.LotteryNotifier.Notifiers;
+using Fighting.Extensions.Serialization.Abstractions;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -9,17 +11,21 @@ namespace Baibaocp.LotteryNotifier.Hongdan.Handlers
     {
         private readonly HttpClient _client;
 
-        private readonly NoticeConfiguration _configuration;
+        private readonly ISerializer _serializer;
 
-        public AwardedNoticeHandler(NoticeConfiguration configuration)
+        private readonly LotteryNoticeOptions _options;
+
+        public AwardedNoticeHandler(ISerializer serializer, LotteryNoticeOptions options)
         {
-            _configuration = configuration;
+            _options = options;
+            _serializer = serializer;
             _client = new HttpClient();
         }
 
         public async Task<bool> HandleAsync(AwardedNotifier notifier)
         {
-            HttpResponseMessage responseMessage = (await _client.PostAsync(_configuration.Url, new StringContent(""))).EnsureSuccessStatusCode();
+            NoticeConfiguration configuration = _options.Configures.SingleOrDefault(predicate => predicate.LvpVenderId == notifier.LvpVenderId);
+            HttpResponseMessage responseMessage = (await _client.PostAsync(configuration.Url, new StringContent(""))).EnsureSuccessStatusCode();
             string content = await responseMessage.Content.ReadAsStringAsync();
             return true;
         }

@@ -28,7 +28,7 @@ namespace Baibaocp.LotteryVender.WebApi.Controllers
 
         private readonly IMessagePublisher _messagePublisher;
 
-        private readonly IRepository<LotterySalesOrderEntity, string> _repository;
+        private readonly IRepository<LotteryVenderOrderEntity, string> _repository;
 
         /// <summary>
         /// 
@@ -36,7 +36,7 @@ namespace Baibaocp.LotteryVender.WebApi.Controllers
         /// <param name="repository"></param>
         /// <param name="cacheManager"></param>
         /// <param name="messagePublisher"></param>
-        public OrdersController(IRepository<LotterySalesOrderEntity, string> repository, ICacheManager cacheManager, IMessagePublisher messagePublisher)
+        public OrdersController(IRepository<LotteryVenderOrderEntity, string> repository, ICacheManager cacheManager, IMessagePublisher messagePublisher)
         {
             _repository = repository;
             _cacheManager = cacheManager;
@@ -54,9 +54,11 @@ namespace Baibaocp.LotteryVender.WebApi.Controllers
         public async Task<OrderOutput> GetOrderAsync(string id)
         {
             ICache cache = _cacheManager.GetCache("Baibaocp.LotterySales.OrdersStatus");
-            LotterySalesOrderEntity entity = await cache.GetAsync(id, cackeKey =>
+            LotteryVenderOrderEntity entity = await cache.GetAsync(id, cackeKey =>
             {
-                return _repository.GetAll().Where(predicate => predicate.ChannelOrderId == cackeKey).FirstOrDefault();
+                return _repository.GetAll().Where(predicate => predicate.LvpOrderId == cackeKey)
+                                           .Where(predicate => predicate.LvpVenderId == "100010")
+                                           .FirstOrDefault();
             });
             if (entity == null)
             {
@@ -92,12 +94,14 @@ namespace Baibaocp.LotteryVender.WebApi.Controllers
         {
             if (ModelState.IsValid)
             {
-                OrderingMessage message = new OrderingMessage
+                string lvpVenderId = "100010";
+                string id = Guid.NewGuid().ToString("N");
+                await _messagePublisher.Publish(RoutingkeyConsts.Orders.Accepted.PrivateVender.Hongdan, new OrderingMessage
                 {
-                    OrderId = Guid.NewGuid().ToString("N"),
+                    OrderId = id,
                     LvpOrderId = order.OrderId,
                     LvpUserId = order.UserId,
-                    LvpVenderId = "100010",
+                    LvpVenderId = lvpVenderId,
                     LotteryId = order.LotteryId,
                     LotteryPlayId = order.LotteryPlayId,
                     IssueNumber = order.IssueNumber,
@@ -106,9 +110,9 @@ namespace Baibaocp.LotteryVender.WebApi.Controllers
                     InvestCount = order.InvestCount,
                     InvestTimes = order.InvestTimes,
                     InvestAmount = order.InvestAmount,
+                    Status = OrderStatus.Ordering.Waiting | OrderStatus.Ticketing.Waiting | OrderStatus.Awarding.Waiting,
                     CreationTime = DateTime.Now
-                };
-                await _messagePublisher.Publish(RoutingkeyConsts.Orders.Accepted.PrivateVender.Hongdan, message, CancellationToken.None);
+                }, CancellationToken.None);
             }
         }
     }

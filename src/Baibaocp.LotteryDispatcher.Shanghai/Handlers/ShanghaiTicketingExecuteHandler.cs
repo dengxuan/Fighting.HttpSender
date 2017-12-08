@@ -33,7 +33,11 @@ namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
             }
             else if (Status.Equals("2002"))
             {
+#if DEBUG
+                return new TicketingResult(OrderStatus.Ticketing.Success);
+#else
                 return new TicketingResult(OrderStatus.Ticketing.Waiting);
+#endif
             }
             else if (Status.Equals("2003"))
             {

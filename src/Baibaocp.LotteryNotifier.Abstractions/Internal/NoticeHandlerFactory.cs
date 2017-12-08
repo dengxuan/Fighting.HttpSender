@@ -10,7 +10,7 @@ namespace Baibaocp.LotteryNotifier.Internal
     {
         private readonly IServiceProvider _iocResolver;
 
-        private readonly ConcurrentDictionary<Type, ObjectFactory> _objectFactorys = new ConcurrentDictionary<Type, ObjectFactory>();
+        private readonly ConcurrentDictionary<Type, object> _objectFactorys = new ConcurrentDictionary<Type, object>();
 
         public NoticeHandlerFactory(IServiceProvider iocResolver)
         {
@@ -19,13 +19,14 @@ namespace Baibaocp.LotteryNotifier.Internal
 
         public INoticeHandler<TNotifier> GetHandler<TNotifier>(NoticeConfiguration configure) where TNotifier : INotifier
         {
-            var factory = _objectFactorys.GetOrAdd(typeof(TNotifier), (key) =>
+            var handler = _objectFactorys.GetOrAdd(typeof(TNotifier), (key) =>
             {
-                ObjectFactory objectFactory = ActivatorUtilities.CreateFactory(typeof(INoticeHandler<TNotifier>), new Type[] { typeof(NoticeConfiguration) });
-                return objectFactory;
+                return _iocResolver.GetRequiredService<INoticeHandler<TNotifier>>();
+                //ObjectFactory objectFactory = ActivatorUtilities.CreateFactory(typeof(INoticeHandler<TNotifier>), new Type[] { typeof(NoticeConfiguration) });
+                //object @object = objectFactory.Invoke(_iocResolver, new object[] { configure });
+                //return @object;
             });
-            object @object = factory.Invoke(_iocResolver, new object[] { configure });
-            return @object as INoticeHandler<TNotifier>;
+            return handler as INoticeHandler<TNotifier>;
         }
     }
 }

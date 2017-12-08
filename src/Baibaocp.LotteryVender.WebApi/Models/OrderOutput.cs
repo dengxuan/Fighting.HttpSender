@@ -65,12 +65,12 @@ namespace Baibaocp.LotteryVender.WebApi.Models
         /// <summary>
         /// 奖金
         /// </summary>
-        public int BonusAmount { get; set; }
+        public int? BonusAmount { get; set; }
 
         /// <summary>
         /// 税后奖金
         /// </summary>
-        public int AftertaxBonusAmount { get; set; }
+        public int? AftertaxBonusAmount { get; set; }
 
         /// <summary>
         /// 状态

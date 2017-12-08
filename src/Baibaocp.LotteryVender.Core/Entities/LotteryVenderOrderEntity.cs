@@ -6,14 +6,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Baibaocp.LotteryVender.Core.Entities
 {
     [Table("BbcpOrders")]
-    public class LotterySalesOrderEntity : Entity<string>
+    public class LotteryVenderOrderEntity : Entity<string>
     {
-
-        /// <summary>
-        /// 订单号
-        /// </summary>
-        [Required]
-        public string ChannelOrderId { get; set; }
 
         /// <summary>
         /// 彩民编号
@@ -21,10 +15,27 @@ namespace Baibaocp.LotteryVender.Core.Entities
         public long LotteryBuyerId { get; set; }
 
         /// <summary>
-        /// 渠道用户编号
+        /// 渠道编号
         /// </summary>
         [Required]
-        public long LvpUserId { get; set; }
+        public string LvpVenderId { get; set; }
+
+        /// <summary>
+        /// 渠道订单号
+        /// </summary>
+        [Required]
+        [Column("ChannelOrderId")]
+        public string LvpOrderId { get; set; }
+
+        /// <summary>
+        /// 渠道用户编号
+        /// </summary>
+        public long? LvpUserId { get; set; }
+
+        /// <summary>
+        /// 出票渠道编号
+        /// </summary>
+        public string LdpVenderId { get; set; }
 
         /// <summary>
         /// 彩种编号
@@ -81,12 +92,12 @@ namespace Baibaocp.LotteryVender.Core.Entities
         /// <summary>
         /// 返奖金额
         /// </summary>
-        public int BonusAmount { get; set; }
+        public int? BonusAmount { get; set; }
 
         /// <summary>
         /// 税后返奖金额
         /// </summary>
-        public int AftertaxBonusAmount { get; set; }
+        public int? AftertaxBonusAmount { get; set; }
 
         /// <summary>
         /// 状态

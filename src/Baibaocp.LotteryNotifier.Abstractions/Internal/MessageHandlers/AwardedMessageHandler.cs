@@ -20,8 +20,9 @@ namespace Baibaocp.LotteryNotifier.Internal.MessageHandlers
         {
             bool result = await _dispatcher.DispatchAsync(new AwardedNotifier
             {
-                LvpVenderId = message.LvpVenderId,
                 OrderId = message.LvpOrderId,
+                LvpVenderId = message.LvpVenderId,
+                Status = message.AwardStatus,
                 Amount = message.Amount
             });
             return result;

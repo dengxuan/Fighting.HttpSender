@@ -18,6 +18,6 @@ namespace Baibaocp.Storaging.EntityFrameworkCore
             optionsBuilder.UseMySql(_storageOptions.DefaultNameOrConnectionString);
         }
 
-        public virtual DbSet<LotterySalesOrderEntity> BbcpOrders { get; set; }
+        public virtual DbSet<LotteryVenderOrderEntity> BbcpOrders { get; set; }
     }
 }

@@ -26,7 +26,7 @@ namespace Baibaocp.LotteryNotifier.Builder
                 s.FromApplicationDependencies()
                 .AddClasses(f => f.AssignableTo(typeof(INoticeHandler<>)), !_discoverySettings.IncludeNonPublic)
                 .UsingRegistrationStrategy(_discoverySettings.RegistrationStrategy)
-                .AsSelf()
+                .AsImplementedInterfaces()
                 .WithLifetime(_discoverySettings.DiscoveredHandlersLifetime);
             });
         }

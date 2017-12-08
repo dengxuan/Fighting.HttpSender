@@ -8,6 +8,8 @@ namespace Baibaocp.LotteryNotifier.Notifiers
 
         public string LvpVenderId { get; set; }
 
+        public int Status { get; set; }
+
         public int Amount { get; set; }
     }
 }

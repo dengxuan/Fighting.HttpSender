@@ -41,7 +41,7 @@ namespace Baibaocp.LotteryNotifier.Hongdan
                     {
                         builderAction.ConfigureOptions(options =>
                         {
-                            options.Configures.Add(new NoticeConfiguration { LvpVenderId = "10010", Url = "http://127.0.0.1:6000", SecurityKey = "10010" });
+                            options.Configures.Add(new NoticeConfiguration { LvpVenderId = "100010", Url = "http://wcapi.baibaocp.com/ordernotify/index", SecurityKey = "1234qwer" });
                         });
                     });
                     services.AddScoped<IHostedService, LotteryNotifierServices>();

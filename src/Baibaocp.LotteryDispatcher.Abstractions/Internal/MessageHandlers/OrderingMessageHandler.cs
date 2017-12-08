@@ -56,8 +56,6 @@ namespace Baibaocp.LotteryDispatcher.Internal.MessageHandlers
                     TicketingMessage ticketingMessage = new TicketingMessage
                     {
                         OrderId = message.OrderId,
-                        LvpOrderId = message.LvpOrderId,
-                        LvpVenderId = message.LvpVenderId,
                         LdpVenderId = ldpVenderId,
                         TicketStatus = executeResult.Result.Code
                     };

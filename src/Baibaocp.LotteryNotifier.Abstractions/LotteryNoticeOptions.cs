@@ -4,6 +4,6 @@ namespace Baibaocp.LotteryNotifier
 {
     public class LotteryNoticeOptions
     {
-        public List<NoticeConfiguration> Configures { get; set; }
+        public List<NoticeConfiguration> Configures { get; } = new List<NoticeConfiguration>();
     }
 }
