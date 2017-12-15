@@ -1,5 +1,4 @@
 ﻿using Baibaocp.LotteryNotifier.Abstractions;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
@@ -22,14 +21,17 @@ namespace Baibaocp.LotteryNotifier
             _logger = loggerFactory.CreateLogger<NoticeDispatcher>();
         }
 
-        public async Task<bool> DispatchAsync<TNotifier>(TNotifier notifier) where TNotifier : INotifier
+        public async Task<bool> DispatchAsync<TNotice>(INotifier<TNotice> notifier) where TNotice : class
         {
             try
             {
                 NoticeConfiguration configuration = _options.Configures.Where(predicate => predicate.LvpVenderId == notifier.LvpVenderId).SingleOrDefault();
-
-                var handler = _handlerFactory.GetHandler<TNotifier>(configuration);
-                var result = await handler.HandleAsync(notifier);
+                if(configuration == null)
+                {
+                    return true;
+                }
+                var handler = _handlerFactory.GetHandler<TNotice>(configuration);
+                var result = await handler.HandleAsync(notifier.Notice);
                 return result;
             }
             catch (Exception ex)

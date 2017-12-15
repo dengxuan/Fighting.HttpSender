@@ -2,6 +2,6 @@
 {
     public interface INoticeHandlerFactory
     {
-        INoticeHandler<TNotifier> GetHandler<TNotifier>(NoticeConfiguration configure) where TNotifier : INotifier;
+        INoticeHandler<TNotice> GetHandler<TNotice>(NoticeConfiguration configure) where TNotice : class;
     }
 }

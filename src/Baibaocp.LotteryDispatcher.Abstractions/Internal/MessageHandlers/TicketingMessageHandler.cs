@@ -26,30 +26,45 @@ namespace Baibaocp.LotteryDispatcher.ShanghaiTicketing.Handlers
         {
             if (!token.IsCancellationRequested)
             {
-                TicketingExecuter executer = new TicketingExecuter(message.LvpVenderId, message.LdpVenderId)
+                TicketingExecuter executer = new TicketingExecuter(message.LdpVenderId)
                 {
-                    OrderId = message.OrderId,
+                    OrderId = message.LdpOrderId,
                 };
                 var executeResult = await _dispatcher.DispatchAsync<TicketingExecuter, TicketingResult>(executer);
                 if (executeResult.Success)
                 {
-                    AwardingMessage ticketedMessage = new AwardingMessage
+                    if (executeResult.Result.Code == OrderStatus.TicketDrawing)
                     {
-                        OrderId = message.OrderId,
-                        LvpOrderId = message.LvpOrderId,
-                        LvpVenderId = message.LvpVenderId,
-                        LdpVenderId = message.LdpVenderId,
-                        TicketOdds = executeResult.Result.TicketOdds,
-                        AwardStatus = executeResult.Result.Code
-                    };
-                    if (executeResult.Result.Code == OrderStatus.Ticketing.Success)
-                    {
-                        await _publisher.Publish(RoutingkeyConsts.Tickets.Completed.Success, ticketedMessage, token);
+                        foreach (var lvpOrder in message.LvpOrders)
+                        {
+                            await _publisher.Publish(RoutingkeyConsts.Tickets.Completed.Success, new
+                            {
+                                LvpOrderId = lvpOrder.LvpOrderId,
+                                LvpVenderId = lvpOrder.LvpVenderId,
+                                LdpOrderId = message.LdpOrderId,
+                                LdpVenderId = message.LdpVenderId,
+                                Amount = lvpOrder.InvestAmount,
+                                TicketOdds = executeResult.Result.TicketOdds,
+                                Status = executeResult.Result.Code
+                            }, token);
+                        }
                         return true;
                     }
-                    else if (executeResult.Result.Code == OrderStatus.Ticketing.Failure)
+                    else if (executeResult.Result.Code == OrderStatus.TicketFailed)
                     {
-                        await _publisher.Publish(RoutingkeyConsts.Tickets.Completed.Failure, ticketedMessage, token);
+                        foreach (var lvpOrder in message.LvpOrders)
+                        {
+                            await _publisher.Publish(RoutingkeyConsts.Tickets.Completed.Failure, new
+                            {
+                                LvpOrderId = lvpOrder.LvpOrderId,
+                                LvpVenderId = lvpOrder.LvpVenderId,
+                                LdpOrderId = message.LdpOrderId,
+                                LdpVenderId = message.LdpVenderId,
+                                Amount = lvpOrder.InvestAmount,
+                                TicketOdds = executeResult.Result.TicketOdds,
+                                Status = executeResult.Result.Code
+                            }, token);
+                        }
                         return true;
                     }
                 }

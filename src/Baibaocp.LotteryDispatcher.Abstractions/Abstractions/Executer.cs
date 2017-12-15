@@ -2,13 +2,10 @@
 {
     public abstract class Executer : IExecuter
     {
-        internal Executer(string lvpVenderId, string ldpVenderId)
+        internal Executer(string ldpVenderId)
         {
-            LvpVenderId = lvpVenderId;
             LdpVenderId = ldpVenderId;
         }
-
-        public string LvpVenderId { get; }
 
         public string LdpVenderId { get; }
     }

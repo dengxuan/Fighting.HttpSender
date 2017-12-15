@@ -1,12 +1,13 @@
-﻿using Baibaocp.LotteryNotifier.Abstractions;
+﻿using Baibaocp.Core;
+using Baibaocp.LotteryNotifier.Abstractions;
 
 namespace Baibaocp.LotteryNotifier.Notifiers
 {
-    public class TicketedNotifier : INotifier
+    public class Ticketed
     {
         public string OrderId { get; set; }
 
-        public string LvpVenderId { get; set; }
+        public string TicketOdds { get; set; }
 
         public int Status { get; set; }
     }

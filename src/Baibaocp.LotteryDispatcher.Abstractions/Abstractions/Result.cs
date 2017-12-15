@@ -1,11 +1,13 @@
-﻿namespace Baibaocp.LotteryDispatcher.Abstractions
+﻿using Baibaocp.Core;
+
+namespace Baibaocp.LotteryDispatcher.Abstractions
 {
     public abstract class Result : IResult
     {
         /// <summary>
         /// Result code.
         /// </summary>
-        public int Code { get; set; }
+        public OrderStatus Code { get; set; }
 
         /// <summary>
         /// Result message.
@@ -16,7 +18,7 @@
         /// Creates a new instance of <see cref="Result"/>.
         /// </summary>
         /// <param name="code">Error code</param>
-        public Result(int code)
+        public Result(OrderStatus code)
         {
             Code = code;
         }
@@ -26,7 +28,7 @@
         /// </summary>
         /// <param name="code">Error code</param>
         /// <param name="message">Error message</param>
-        public Result(int code, string message) : this(code)
+        public Result(OrderStatus code, string message) : this(code)
         {
             Message = message;
         }

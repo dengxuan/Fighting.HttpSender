@@ -7,7 +7,7 @@ using Baibaocp.LotteryNotifier.Notifiers;
 
 namespace Baibaocp.LotteryNotifier.Internal.MessageHandlers
 {
-    public class TicketedMessageHandler : IMessageHandler<TicketingMessage>
+    public class TicketedMessageHandler : IMessageHandler<TicketedMessage>
     {
         private readonly INoticeDispatcher _dispatcher;
 
@@ -16,13 +16,16 @@ namespace Baibaocp.LotteryNotifier.Internal.MessageHandlers
             _dispatcher = dispatcher;
         }
 
-        public async Task<bool> Handle(TicketingMessage message, CancellationToken token)
+        public async Task<bool> Handle(TicketedMessage message, CancellationToken token)
         {
-            bool result = await _dispatcher.DispatchAsync(new TicketedNotifier
+            bool result = await _dispatcher.DispatchAsync(new Notifier<Ticketed>(message.LvpVenderId)
             {
-                OrderId = message.LvpOrderId,
-                LvpVenderId = message.LvpVenderId,
-                Status = message.TicketStatus
+                Notice = new Ticketed
+                {
+                    OrderId = message.LvpOrderId,
+                    TicketOdds = message.TicketOdds,
+                    Status = message.Status == Core.OrderStatus.TicketDrawing ? 10300 : 10301
+                }
             });
             return result;
         }

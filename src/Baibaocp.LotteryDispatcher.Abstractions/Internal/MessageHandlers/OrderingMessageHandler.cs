@@ -5,6 +5,8 @@ using Baibaocp.LotteryDispatcher.Executers;
 using Baibaocp.LotteryDispatcher.Models.Results;
 using Fighting.Extensions.Caching.Abstractions;
 using Fighting.Extensions.Messaging.Abstractions;
+using Fighting.Storaging.Abstractions;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,19 +19,22 @@ namespace Baibaocp.LotteryDispatcher.Internal.MessageHandlers
 
         private readonly IExecuterDispatcher _dispatcher;
 
+        private readonly IStringGenerator _stringGenerator;
+
         private readonly ICache _issueNumberCache;
 
         private readonly ICache _sportsEventCache;
 
         private readonly ICache _loggeryVenderMappingCache;
 
-        public OrderingMessageHandler(ICacheManager cacheManager, IMessagePublisher publisher, IExecuterDispatcher dispatcher)
+        public OrderingMessageHandler(ICacheManager cacheManager, IMessagePublisher publisher, IExecuterDispatcher dispatcher, IStringGenerator stringGenerator)
         {
             _issueNumberCache = cacheManager.GetCache("IssueNumbers");
             _sportsEventCache = cacheManager.GetCache("SportsEvents");
             _loggeryVenderMappingCache = cacheManager.GetCache("LotteryVenderMappings");
             _publisher = publisher;
             _dispatcher = dispatcher;
+            _stringGenerator = stringGenerator;
         }
 
         public async Task<bool> Handle(OrderingMessage message, CancellationToken token)
@@ -38,9 +43,9 @@ namespace Baibaocp.LotteryDispatcher.Internal.MessageHandlers
             {
                 var ldpVenderId = await _loggeryVenderMappingCache.GetAsync($"{message.LvpVenderId}-{message.LotteryId}", (key) => { return "800"; });
 
-                OrderingExecuter executer = new OrderingExecuter(message.LvpVenderId, ldpVenderId)
+                OrderingExecuter executer = new OrderingExecuter(ldpVenderId)
                 {
-                    OrderId = message.OrderId,
+                    OrderId = _stringGenerator.Create(),
                     InvestAmount = message.InvestAmount,
                     InvestCode = message.InvestCode,
                     InvestCount = message.InvestCount,
@@ -53,25 +58,43 @@ namespace Baibaocp.LotteryDispatcher.Internal.MessageHandlers
                 var executeResult = await _dispatcher.DispatchAsync<OrderingExecuter, OrderingResult>(executer);
                 if (executeResult.Success)
                 {
-                    TicketingMessage ticketingMessage = new TicketingMessage
+                    if (executeResult.Result.Code == OrderStatus.Ticketing || executeResult.Result.Code == OrderStatus.TicketDrawing)
                     {
-                        OrderId = message.OrderId,
-                        LdpVenderId = ldpVenderId,
-                        TicketStatus = executeResult.Result.Code
-                    };
-                    if (executeResult.Result.Code == OrderStatus.Ordering.Success)
-                    {
+                        message.Status = executeResult.Result.Code;
+                        TicketingMessage ticketingMessage = new TicketingMessage
+                        {
+                            LdpOrderId = executer.OrderId,
+                            LdpVenderId = ldpVenderId,
+                            LvpOrders = new List<OrderingMessage>
+                            {
+                                message
+                            }
+                        };
                         await _publisher.Publish(RoutingkeyConsts.Orders.Completed.Success, ticketingMessage, token);
-                        return true;
                     }
-                    else if (executeResult.Result.Code == OrderStatus.Ordering.Failure)
+                    else
                     {
-                        await _publisher.Publish(RoutingkeyConsts.Orders.Completed.Failure, ticketingMessage, token);
-                        return true;
+                        await _publisher.Publish(RoutingkeyConsts.Orders.Completed.Failure, new
+                        {
+                            LvpOrderId = message.LvpOrderId,
+                            LvpVenderId = message.LvpVenderId,
+                            Amount = message.InvestAmount,
+                            Status = executeResult.Result.Code
+                        }, token);
                     }
                 }
+                else
+                {
+                    await _publisher.Publish(RoutingkeyConsts.Orders.Completed.Failure, new
+                    {
+                        LvpOrderId = message.LvpOrderId,
+                        LvpVenderId = message.LvpVenderId,
+                        Amount = message.InvestAmount,
+                        Status = OrderStatus.TicketNotRecv
+                    }, token);
+                }
             }
-            return false;
+            return true;
         }
     }
 }

@@ -13,8 +13,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LotteryDispatcher", "Lotter
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LotteryVender", "LotteryVender", "{0936F6A2-46C4-46E1-A456-A7902C5AF4B3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Baibaocp.Storaging.EntityFrameworkCore", "src\Baibaocp.Storaging.EntityFrameworkCore\Baibaocp.Storaging.EntityFrameworkCore.csproj", "{CED60A39-0F5E-4DF1-A38B-05AB9C807931}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Baibaocp.LotteryDispatcher.Abstractions", "src\Baibaocp.LotteryDispatcher.Abstractions\Baibaocp.LotteryDispatcher.Abstractions.csproj", "{895BCBE5-C32E-4C66-9E8C-C6BC9D1EC033}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Baibaocp.LotteryDispatcher.Shanghai.Abstractions", "src\Baibaocp.LotteryDispatcher.Shanghai.Abstractions\Baibaocp.LotteryDispatcher.Shanghai.Abstractions.csproj", "{290DA5F8-EC5C-48E9-B932-CDB28D51AB1F}"
@@ -35,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Baibaocp.LotteryNotifier.Ho
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LotteryStoraging", "LotteryStoraging", "{4D0D9F44-3B04-4FAD-861C-CD770575E433}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Baibaocp.LotteryStoraging.Hosting", "src\Baibaocp.LotteryStoraging.Hosting\Baibaocp.LotteryStoraging.Hosting.csproj", "{A513DAE1-9FA3-42C5-AC0A-95BF51C6372A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Baibaocp.LotteryStoraging.Hosting", "src\Baibaocp.LotteryStoraging.Hosting\Baibaocp.LotteryStoraging.Hosting.csproj", "{A513DAE1-9FA3-42C5-AC0A-95BF51C6372A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Baibaocp.LotteryStoraging.Abstractions", "src\Baibaocp.LotteryStoraging.Abstractions\Baibaocp.LotteryStoraging.Abstractions.csproj", "{D03158B0-914B-4400-B2D7-479FC394E531}"
 EndProject
@@ -49,10 +47,6 @@ Global
 		{E3F8093E-137A-4974-B177-95E8CB95441C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E3F8093E-137A-4974-B177-95E8CB95441C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E3F8093E-137A-4974-B177-95E8CB95441C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CED60A39-0F5E-4DF1-A38B-05AB9C807931}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CED60A39-0F5E-4DF1-A38B-05AB9C807931}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CED60A39-0F5E-4DF1-A38B-05AB9C807931}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CED60A39-0F5E-4DF1-A38B-05AB9C807931}.Release|Any CPU.Build.0 = Release|Any CPU
 		{895BCBE5-C32E-4C66-9E8C-C6BC9D1EC033}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{895BCBE5-C32E-4C66-9E8C-C6BC9D1EC033}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{895BCBE5-C32E-4C66-9E8C-C6BC9D1EC033}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -101,7 +95,6 @@ Global
 		{E3F8093E-137A-4974-B177-95E8CB95441C} = {1A21A87C-1C11-43B1-8840-145492C04302}
 		{879CA4FA-34B2-463B-92D3-DCD011099569} = {1A21A87C-1C11-43B1-8840-145492C04302}
 		{0936F6A2-46C4-46E1-A456-A7902C5AF4B3} = {1A21A87C-1C11-43B1-8840-145492C04302}
-		{CED60A39-0F5E-4DF1-A38B-05AB9C807931} = {1A21A87C-1C11-43B1-8840-145492C04302}
 		{895BCBE5-C32E-4C66-9E8C-C6BC9D1EC033} = {879CA4FA-34B2-463B-92D3-DCD011099569}
 		{290DA5F8-EC5C-48E9-B932-CDB28D51AB1F} = {879CA4FA-34B2-463B-92D3-DCD011099569}
 		{250E75F0-39AB-48D9-83C5-EC800A4B8618} = {0936F6A2-46C4-46E1-A456-A7902C5AF4B3}

@@ -1,7 +1,32 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Baibaocp.LotteryVender.WebApi.Entity
 {
+    /// <summary>
+    /// 请求消息
+    /// </summary>
+    public class RequestMessage
+    {
+        /// <summary>
+        /// 渠道编号
+        /// </summary>
+        [Required]
+        public string VenderId { get; set; }
+
+        /// <summary>
+        /// 校验值
+        /// </summary>
+        [Required]
+        public string Signature { get; set; }
+
+        /// <summary>
+        /// 订单内容
+        /// </summary>
+        [Required]
+        public List<OrderInput> Orders { get; set; }
+    }
+
     /// <summary>
     /// 用户订单
     /// </summary>

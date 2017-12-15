@@ -1,14 +1,15 @@
-﻿using Baibaocp.LotteryDispatcher.Abstractions;
+﻿using Baibaocp.Core;
+using Baibaocp.LotteryDispatcher.Abstractions;
 
 namespace Baibaocp.LotteryDispatcher.Models.Results
 {
     public class OrderingResult : Result
     {
-        public OrderingResult(int code) : base(code)
+        public OrderingResult(OrderStatus code) : base(code)
         {
         }
 
-        public OrderingResult(int code, string message) : base(code, message)
+        public OrderingResult(OrderStatus code, string message) : base(code, message)
         {
         }
     }

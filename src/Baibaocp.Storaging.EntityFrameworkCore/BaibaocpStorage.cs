@@ -19,5 +19,9 @@ namespace Baibaocp.Storaging.EntityFrameworkCore
         }
 
         public virtual DbSet<LotteryVenderOrderEntity> BbcpOrders { get; set; }
+
+        public virtual DbSet<LotteryVenderEntity> BbcpVenders { get; set; }
+
+        public virtual DbSet<LotteryVenderAccountDetailEntity> BbcpVenderAccountDetails { get; set; }
     }
 }

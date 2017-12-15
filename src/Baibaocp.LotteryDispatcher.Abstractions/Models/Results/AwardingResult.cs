@@ -1,4 +1,5 @@
-﻿using Baibaocp.LotteryDispatcher.Abstractions;
+﻿using Baibaocp.Core;
+using Baibaocp.LotteryDispatcher.Abstractions;
 
 namespace Baibaocp.LotteryDispatcher.Models.Results
 {
@@ -6,11 +7,11 @@ namespace Baibaocp.LotteryDispatcher.Models.Results
     {
         public int? Amount { get; set; }
 
-        public AwardingResult(int code) : base(code)
+        public AwardingResult(OrderStatus code) : base(code)
         {
         }
 
-        public AwardingResult(int code, string message) : base(code, message)
+        public AwardingResult(OrderStatus code, string message) : base(code, message)
         {
         }
     }

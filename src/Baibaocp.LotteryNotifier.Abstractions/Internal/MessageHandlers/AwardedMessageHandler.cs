@@ -18,12 +18,14 @@ namespace Baibaocp.LotteryNotifier.Internal.MessageHandlers
 
         public async Task<bool> Handle(AwardingMessage message, CancellationToken token)
         {
-            bool result = await _dispatcher.DispatchAsync(new AwardedNotifier
+            bool result = await _dispatcher.DispatchAsync(new Notifier<Awarded>(message.LdpVenderId)
             {
-                OrderId = message.LvpOrderId,
-                LvpVenderId = message.LvpVenderId,
-                Status = message.AwardStatus,
-                Amount = message.Amount
+                Notice = new Awarded
+                {
+                    OrderId = message.OrderId,
+                    Status = message.Status == Core.OrderStatus.TicketWinning ? 10400 : 10401,
+                    Amount = message.Amount
+                }
             });
             return result;
         }

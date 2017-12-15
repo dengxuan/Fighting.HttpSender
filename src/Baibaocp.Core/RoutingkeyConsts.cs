@@ -35,6 +35,11 @@
             }
 
             /// <summary>
+            /// 待投注
+            /// </summary>
+            public const string Storaged = "Orders.Storaged.{0}.{1}";
+
+            /// <summary>
             /// 投注完成
             /// </summary>
             public static class Completed

@@ -1,59 +1,100 @@
 ﻿using Baibaocp.Core;
 using Baibaocp.Core.Messages;
 using Baibaocp.LotteryVender.Core.Entities;
+using Dapper;
 using Fighting.Extensions.Caching.Abstractions;
 using Fighting.Extensions.Messaging.Abstractions;
+using Fighting.Storaging;
+using Fighting.Storaging.Abstractions;
 using Fighting.Storaging.Repositories.Abstractions;
+using Pomelo.Data.MySql;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 
 namespace Baibaocp.LotteryStoraging.Abstractions.MessageHandlers
 {
-    internal class AwardingStorageMessageHandler : IMessageHandler<AwardingMessage>
+    public class AwardingStorageMessageHandler : IMessageHandler<AwardingMessage>
     {
+        private readonly StorageOptions _options;
+
         private readonly ICacheManager _cacheManager;
 
-        private readonly IRepository<LotteryVenderEntities, string> _venderRepository;
+        private readonly IStringGenerator _stringGenerator;
 
-        private readonly IRepository<LotteryVenderOrderEntity, string> _venderOrderRepository;
-
-        private readonly IRepository<LotteryVenderAccountDetailEntity, string> _venderAccountDetailRepository;
-
-        public AwardingStorageMessageHandler(ICacheManager cacheManager, IRepository<LotteryVenderEntities, string> venderRepository, IRepository<LotteryVenderOrderEntity, string> venderOrderRepository, IRepository<LotteryVenderAccountDetailEntity, string> venderAccountDetailRepository)
+        public AwardingStorageMessageHandler(StorageOptions options, ICacheManager cacheManager, IStringGenerator stringGenerator)
         {
+            _options = options;
             _cacheManager = cacheManager;
-            _venderRepository = venderRepository;
-            _venderOrderRepository = venderOrderRepository;
-            _venderAccountDetailRepository = venderAccountDetailRepository;
+            _stringGenerator = stringGenerator;
         }
 
         public async Task<bool> Handle(AwardingMessage message, CancellationToken token)
         {
-            LotteryVenderOrderEntity order = await _venderOrderRepository.GetAsync(message.OrderId);
-            order.Status = message.AwardStatus;
-            if (message.AwardStatus == OrderStatus.Awarding.Winning)
+            using (MySqlConnection connection = new MySqlConnection(_options.DefaultNameOrConnectionString))
             {
-                LotteryVenderEntities ldp = await _venderRepository.GetAsync(message.LdpVenderId);
-                ldp.Balance = ldp.Balance - order.InvestAmount;
-                ldp.TicketAmount = ldp.TicketAmount + order.InvestAmount;
+                using (TransactionScope transaction = new TransactionScope())
+                {
+                    if (message.Status == OrderStatus.TicketWinning)
+                    {
 
-                order.LdpVenderId = message.LdpVenderId;
-                await _venderRepository.UpdateAsync(ldp);
-                await _venderAccountDetailRepository.InsertAsync(new LotteryVenderAccountDetailEntity { Id = Guid.NewGuid().ToString("N"), VenderId = order.LdpVenderId, OrderId = order.LdpVenderId, LotteryId = order.LotteryId, Amount = order.InvestAmount, Status = order.Status, CretionTime = DateTime.Now });
-                await _venderAccountDetailRepository.InsertAsync(new LotteryVenderAccountDetailEntity { Id = Guid.NewGuid().ToString("N"), VenderId = order.LdpVenderId, OrderId = order.LdpVenderId, LotteryId = order.LotteryId, Amount = order.InvestAmount, Status = order.Status, CretionTime = DateTime.Now });
+                        await connection.ExecuteAsync("UPDATE `BbcpOrders` SET `BonusAmount`=@BonusAmount, `AfterTaxBonusAmount`=@AftertaxBonusAmount, `Status` = `Status` | @Status WHERE `Id`=@Id", new
+                        {
+                            Id = message.OrderId,
+                            BonusAmount = message.Amount,
+                            AftertaxBonusAmount = message.AftertaxAmount,
+                            Status = OrderStatus.TicketWinning
+                        });
 
+                        // ldp
+                        await connection.ExecuteAsync("UPDATE `BbcpChannels` SET `RestPreMoney` = `RestPreMoney` + @Amount, `RewardMoney` = `RewardMoney` + @Amount WHERE `Id` = @Id;", new
+                        {
+                            Id = message.LdpVenderId,
+                            Amount = message.Amount
+                        });
+                        await connection.ExecuteAsync("INSERT INTO `BbcpChannelAccountDetails`(`Id`,`ChannelId`,`LotteryId`,`OrderId`,`Amount`,`Status`,`CreationTime`)VALUES(@Id,@ChannelId,@LotteryId,@OrderId,@Amount,@Status,@CreationTime)", new
+                        {
+                            Id = _stringGenerator.Create(),
+                            ChannelId = message.LdpVenderId,
+                            LotteryId = message.LotteryId,
+                            OrderId = message.OrderId,
+                            Amount = message.Amount,
+                            Status = OrderStatus.TicketWinning,
+                            CreationTime = DateTime.Now
+                        });
 
-                LotteryVenderEntities lvp = await _venderRepository.GetAsync(order.LvpVenderId);
-                lvp.Balance = lvp.Balance + order.InvestAmount;
-                lvp.TicketAmount = lvp.TicketAmount - order.InvestAmount;
-                await _venderRepository.UpdateAsync(lvp);
-                await _venderAccountDetailRepository.InsertAsync(new LotteryVenderAccountDetailEntity { Id = Guid.NewGuid().ToString("N"), VenderId = order.LvpVenderId, OrderId = order.LvpOrderId, LotteryId = order.LotteryId, Amount = order.InvestAmount, Status = order.Status, CretionTime = DateTime.Now });
-                await _venderAccountDetailRepository.InsertAsync(new LotteryVenderAccountDetailEntity { Id = Guid.NewGuid().ToString("N"), VenderId = order.LvpVenderId, OrderId = order.LvpOrderId, LotteryId = order.LotteryId, Amount = order.InvestAmount, Status = order.Status, CretionTime = DateTime.Now });
+                        //lvp
+                        await connection.ExecuteAsync("UPDATE `BbcpChannels` SET `RestPreMoney` = `RestPreMoney` + @Amount, `RewardMoney` = `RewardMoney` + @Amount WHERE `Id` = @Id;", new
+                        {
+                            Id = message.LvpVenderId,
+                            Amount = message.Amount
+                        });
+                        await connection.ExecuteAsync("INSERT INTO `BbcpChannelAccountDetails`(`Id`,`ChannelId`,`LotteryId`,`OrderId`,`Amount`,`Status`,`CreationTime`)VALUES(@Id,@ChannelId,@LotteryId,@OrderId,@Amount,@Status,@CreationTime)", new
+                        {
+                            Id = _stringGenerator.Create(),
+                            ChannelId = message.LvpVenderId,
+                            LotteryId = message.LotteryId,
+                            OrderId = message.OrderId,
+                            Amount = message.Amount,
+                            Status = OrderStatus.TicketWinning,
+                            CreationTime = DateTime.Now
+                        });
+                    }
+                    else if (message.Status == OrderStatus.TicketLosing)
+                    {
+                        await connection.ExecuteAsync("UPDATE `BbcpOrders` SET `LdpVenderId`=@LdpVenderId, `Status` = `Status` | @Status WHERE `Id`=@Id", new
+                        {
+                            Id = message.LdpVenderId,
+                            LdpVenderId = message.LdpVenderId,
+                            Status = OrderStatus.TicketLosing
+                        });
+                    }
+                    transaction.Complete();
+                }
             }
-            ICache cacher = _cacheManager.GetCache("LotteryVender.Orders");
-            await cacher.SetAsync(order.Id, Task.FromResult(order));
-            await _venderOrderRepository.UpdateAsync(order);
+            //ICache cacher = _cacheManager.GetCache("LotteryVender.Orders");
+            //await cacher.SetAsync(order.Id, Task.FromResult(order));
             return true;
         }
     }

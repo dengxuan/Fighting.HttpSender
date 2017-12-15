@@ -1,68 +1,55 @@
 ﻿namespace Baibaocp.Core
 {
-    public static class OrderStatus
+    public enum OrderStatus
     {
         /// <summary>
-        /// 投注状态
+        /// 接单成功
         /// </summary>
-        public static class Ordering
-        {
-            /// <summary>
-            /// 等待投注
-            /// </summary>
-            public const int Waiting = 0x0001;
-
-            /// <summary>
-            /// 投注成功
-            /// </summary>
-            public const int Success = 0x0002;
-
-            /// <summary>
-            /// 投注失败
-            /// </summary>
-            public const int Failure = 0x0003;
-        }
+        Succeed = 1000,
 
         /// <summary>
-        /// 出票状态
+        /// 等待出票
         /// </summary>
-        public static class Ticketing
-        {
-            /// <summary>
-            /// 等待出票
-            /// </summary>
-            public const int Waiting = 0x0010;
-
-            /// <summary>
-            /// 出票成功
-            /// </summary>
-            public const int Success = 0x0020;
-
-            /// <summary>
-            /// 出票失败
-            /// </summary>
-            public const int Failure = 0x0030;
-        }
+        Ticketing = 2000,
 
         /// <summary>
-        /// 返奖状态
+        /// 出票失败
         /// </summary>
-        public static class Awarding
-        {
-            /// <summary>
-            /// 等待返奖
-            /// </summary>
-            public const int Waiting = 0x0100;
+        TicketFailed = 3000,
 
-            /// <summary>
-            /// 中奖
-            /// </summary>
-            public const int Winning = 0x0200;
+        /// <summary>
+        /// 票过期，未投注
+        /// </summary>
+        TicketNotSend = 3001,
 
-            /// <summary>
-            /// 未中奖
-            /// </summary>
-            public const int Loseing = 0x0300;
-        }
+        /// <summary>
+        /// 上游系统未接单
+        /// </summary>
+        TicketNotRecv = 3002,
+
+        /// <summary>
+        /// 等待开奖
+        /// </summary>
+        TicketDrawing = 4000,
+
+        /// <summary>
+        /// 已中奖
+        /// </summary>
+        TicketWinning = 4001,
+
+        /// <summary>
+        /// 未中奖
+        /// </summary>
+        TicketLosing = 4002,
+
+        /// <summary>
+        /// 已返奖
+        /// </summary>
+        TicketGrantAward = 4003,
+
+        /// <summary>
+        /// 中奖未查询
+        /// </summary>
+        WinningNotQuery = 4004,
     }
 }

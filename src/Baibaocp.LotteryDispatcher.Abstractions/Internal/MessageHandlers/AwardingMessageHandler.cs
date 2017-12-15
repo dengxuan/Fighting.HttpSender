@@ -26,21 +26,21 @@ namespace Baibaocp.LotteryDispatcher.ShanghaiAwarding.Handlers
         {
             if (!token.IsCancellationRequested)
             {
-                AwardingExecuter executer = new AwardingExecuter(message.LvpVenderId, message.LdpVenderId)
+                AwardingExecuter executer = new AwardingExecuter(message.LdpVenderId)
                 {
                     OrderId = message.OrderId,
                 };
                 var executeResult = await _dispatcher.DispatchAsync<AwardingExecuter, AwardingResult>(executer);
                 if (executeResult.Success)
                 {
-                    message.AwardStatus = executeResult.Result.Code;
+                    message.Status = executeResult.Result.Code;
                     message.Amount = executeResult.Result.Amount ?? 0;
-                    if (executeResult.Result.Code == OrderStatus.Awarding.Winning)
+                    if (executeResult.Result.Code == OrderStatus.TicketWinning)
                     {
                         await _publisher.Publish(RoutingkeyConsts.Awards.Completed.Winning, message, token);
                         return true;
                     }
-                    else if (executeResult.Result.Code == OrderStatus.Awarding.Loseing)
+                    else if (executeResult.Result.Code == OrderStatus.TicketLosing)
                     {
                         await _publisher.Publish(RoutingkeyConsts.Awards.Completed.Loseing, message, token);
                         return true;

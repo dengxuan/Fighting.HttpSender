@@ -1,17 +1,16 @@
-﻿namespace Baibaocp.Core.Messages
+﻿using System.Collections.Generic;
+
+namespace Baibaocp.Core.Messages
 {
+    /// <summary>
+    /// 待出票订单
+    /// </summary>
     public class TicketingMessage
     {
-        public string OrderId { get; set; }
-
-        public string LvpVenderId { get; set; }
-
-        public string LvpOrderId { get; set; }
+        public string LdpOrderId { get; set; }
 
         public string LdpVenderId { get; set; }
 
-        public string TicketOdds { get; set; }
-
-        public int TicketStatus { get; set; }
+        public List<OrderingMessage> LvpOrders { get; set; }
     }
 }

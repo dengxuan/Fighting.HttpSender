@@ -1,9 +1,9 @@
 ﻿namespace Baibaocp.LotteryNotifier.Abstractions
 {
-    public interface INotifier
+    public interface INotifier<TNotice> where TNotice : class
     {
-        string OrderId { get; set; }
-
         string LvpVenderId { get; set; }
+
+        TNotice Notice { get; set; }
     }
 }

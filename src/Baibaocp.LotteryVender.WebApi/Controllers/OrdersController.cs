@@ -86,33 +86,35 @@ namespace Baibaocp.LotteryVender.WebApi.Controllers
         /// <summary>
         /// 投注
         /// </summary>
-        /// <param name="order">订单</param>
+        /// <param name="request">订单</param>
         [HttpPost]
         [WrapResult]
         [AllowAnonymous]
-        public async Task PostAsync([FromBody] OrderInput order)
+        public async Task PostAsync([FromBody] RequestMessage request)
         {
             if (ModelState.IsValid)
             {
-                string lvpVenderId = "100010";
-                string id = Guid.NewGuid().ToString("N");
-                await _messagePublisher.Publish(RoutingkeyConsts.Orders.Accepted.PrivateVender.Hongdan, new OrderingMessage
+                foreach (var item in request.Orders)
                 {
-                    OrderId = id,
-                    LvpOrderId = order.OrderId,
-                    LvpUserId = order.UserId,
-                    LvpVenderId = lvpVenderId,
-                    LotteryId = order.LotteryId,
-                    LotteryPlayId = order.LotteryPlayId,
-                    IssueNumber = order.IssueNumber,
-                    InvestType = order.InvestType == 1,
-                    InvestCode = order.InvestCode,
-                    InvestCount = order.InvestCount,
-                    InvestTimes = order.InvestTimes,
-                    InvestAmount = order.InvestAmount,
-                    Status = OrderStatus.Ordering.Waiting | OrderStatus.Ticketing.Waiting | OrderStatus.Awarding.Waiting,
-                    CreationTime = DateTime.Now
-                }, CancellationToken.None);
+                    string id = Guid.NewGuid().ToString("N");
+                    await _messagePublisher.Publish(RoutingkeyConsts.Orders.Accepted.PrivateVender.Hongdan, new OrderingMessage
+                    {
+                        OrderId = id,
+                        LvpOrderId = item.OrderId,
+                        LvpUserId = item.UserId,
+                        LvpVenderId = request.VenderId,
+                        LotteryId = item.LotteryId,
+                        LotteryPlayId = item.LotteryPlayId,
+                        IssueNumber = item.IssueNumber,
+                        InvestType = item.InvestType == 1,
+                        InvestCode = item.InvestCode,
+                        InvestCount = item.InvestCount,
+                        InvestTimes = item.InvestTimes,
+                        InvestAmount = item.InvestAmount,
+                        Status = OrderStatus.Ordering.Waiting | OrderStatus.Ticketing.Waiting | OrderStatus.Awarding.Waiting,
+                        CreationTime = DateTime.Now
+                    }, CancellationToken.None);
+                }
             }
         }
     }

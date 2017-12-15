@@ -24,10 +24,10 @@ namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
                     string.Format("LotID={0}", executer.LotteryId.ToLottery()),
                     string.Format("LotIssue={0}", executer.IssueNumber),
                     string.Format("LotMoney={0}", executer.InvestAmount/100),
-                    string.Format("LotCode={0}", executer.InvestCode.ToCastcode(executer.LotteryPlayId)),
+                    string.Format("LotCode={0}",ShanghaiJcCode.ReturnShanghaiCode(executer.InvestCode,executer.LotteryId,executer.LotteryPlayId)),
                     string.Format("LotMulti={0}", executer.InvestTimes),
                     string.Format("Attach={0}", ""),
-                    string.Format("OneMoney={0}", executer.InvestType == false ? "2":"3")
+                    string.Format("OneMoney={0}", executer.InvestType ? "3":"2")
             };
             return string.Join("_", values);
         }
@@ -37,16 +37,22 @@ namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
             string Status = document.Element("ActionResult").Element("xCode").Value;
             if (Status.Equals("0") || Status.Equals("1") || Status.Equals("1008"))
             {
-                return new OrderingResult(OrderStatus.Ordering.Success);
+                return new OrderingResult(OrderStatus.Ticketing);
             }
-            else if(Status.Equals("1003") || Status.Equals("1004"))
+            else if (Status.Equals("1003") || Status.Equals("1004"))
             {
                 // TODO: Log here and notice to admin
                 _logger.LogWarning("Response message {0}", document.ToString(SaveOptions.DisableFormatting | SaveOptions.OmitDuplicateNamespaces));
-                return new OrderingResult(OrderStatus.Ordering.Waiting);
+                return new OrderingResult(OrderStatus.TicketNotRecv);
+            }
+            else if (Status.Equals("1016"))
+            {
+                // TODO: Log here and notice to admin
+                _logger.LogWarning("Response message {0}", document.ToString(SaveOptions.DisableFormatting | SaveOptions.OmitDuplicateNamespaces));
+                return new OrderingResult(OrderStatus.TicketNotSend);
             }
             _logger.LogError("Response message {0}", document.ToString(SaveOptions.DisableFormatting | SaveOptions.OmitDuplicateNamespaces));
-            return new OrderingResult(OrderStatus.Ordering.Failure);
+            return new OrderingResult(OrderStatus.TicketFailed);
         }
     }
 }

@@ -3,30 +3,36 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Concurrent;
 using System.Collections;
+using Fighting.Extensions.Serialization.Abstractions;
 
 namespace Baibaocp.LotteryNotifier.Internal
 {
     internal class NoticeHandlerFactory : INoticeHandlerFactory
     {
         private readonly IServiceProvider _iocResolver;
+        private readonly LotteryNoticeOptions _options;
 
-        private readonly ConcurrentDictionary<Type, object> _objectFactorys = new ConcurrentDictionary<Type, object>();
+        private readonly ConcurrentDictionary<Type, ObjectFactory> _objectFactorys = new ConcurrentDictionary<Type, ObjectFactory>();
 
-        public NoticeHandlerFactory(IServiceProvider iocResolver)
+        public NoticeHandlerFactory(IServiceProvider iocResolver, LotteryNoticeOptions options)
         {
+            _options = options;
             _iocResolver = iocResolver;
         }
 
-        public INoticeHandler<TNotifier> GetHandler<TNotifier>(NoticeConfiguration configure) where TNotifier : INotifier
+        public INoticeHandler<TNotice> GetHandler<TNotice>(NoticeConfiguration configure) where TNotice : class
         {
-            var handler = _objectFactorys.GetOrAdd(typeof(TNotifier), (key) =>
+            var handler = _objectFactorys.GetOrAdd(typeof(INotifier<TNotice>), (key) =>
             {
-                return _iocResolver.GetRequiredService<INoticeHandler<TNotifier>>();
-                //ObjectFactory objectFactory = ActivatorUtilities.CreateFactory(typeof(INoticeHandler<TNotifier>), new Type[] { typeof(NoticeConfiguration) });
-                //object @object = objectFactory.Invoke(_iocResolver, new object[] { configure });
-                //return @object;
+                //return _iocResolver.GetRequiredService<INoticeHandler<TNotice>>();
+                if (_options.Mappings.TryGetValue(typeof(INoticeHandler<TNotice>), out Type handlerType))
+                {
+                    ObjectFactory objectFactory = ActivatorUtilities.CreateFactory(handlerType, new Type[] { typeof(NoticeConfiguration) });
+                    return objectFactory;
+                }
+                throw new Exception();
             });
-            return handler as INoticeHandler<TNotifier>;
+            return handler.Invoke(_iocResolver, new object[] { configure }) as INoticeHandler<TNotice>;
         }
     }
 }

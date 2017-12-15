@@ -1,5 +1,8 @@
 ﻿using Baibaocp.Core.Messages;
+using Baibaocp.LotteryNotifier.Abstractions;
 using Baibaocp.LotteryNotifier.DependencyInjection;
+using Baibaocp.LotteryNotifier.Hongdan.Handlers;
+using Baibaocp.LotteryNotifier.Notifiers;
 using Fighting.Extensions.Messaging.DependencyInjection;
 using Fighting.Extensions.Serialization.Json.DependencyInjection;
 using Fighting.Security.Cryptography;
@@ -33,7 +36,7 @@ namespace Baibaocp.LotteryNotifier.Hongdan
                             options.ExchangeName = "Baibaocp.LotteryVender";
                         }).ConfigureOptions(messageOptions =>
                         {
-                            messageOptions.AddConsumer<TicketingMessage>("Lvp.Tickets.Notifier");
+                            messageOptions.AddConsumer<TicketedMessage>("Lvp.Tickets.Notifier");
                             messageOptions.AddConsumer<AwardingMessage>("Lvp.Awards.Notifier");
                         });
                     });
@@ -41,7 +44,9 @@ namespace Baibaocp.LotteryNotifier.Hongdan
                     {
                         builderAction.ConfigureOptions(options =>
                         {
-                            options.Configures.Add(new NoticeConfiguration { LvpVenderId = "100010", Url = "http://wcapi.baibaocp.com/ordernotify/index", SecurityKey = "1234qwer" });
+                            options.Mappings.Add(typeof(INoticeHandler<Ticketed>), typeof(TicketedNoticeHandler));
+                            options.Mappings.Add(typeof(INoticeHandler<Awarded>), typeof(AwardedNoticeHandler));
+                            options.Configures.Add(new NoticeConfiguration { LvpVenderId = "10080000163", Url = "http://wcapi.mgupiao.com/", SecurityKey = "1234qwer" });
                         });
                     });
                     services.AddScoped<IHostedService, LotteryNotifierServices>();

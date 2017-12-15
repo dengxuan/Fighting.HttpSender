@@ -1,12 +1,10 @@
-﻿using Baibaocp.LotteryNotifier.Abstractions;
+﻿using Baibaocp.Core;
 
 namespace Baibaocp.LotteryNotifier.Notifiers
 {
-    public class AwardedNotifier : INotifier
+    public class Awarded
     {
         public string OrderId { get; set; }
-
-        public string LvpVenderId { get; set; }
 
         public int Status { get; set; }
 

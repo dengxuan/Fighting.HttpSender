@@ -13,6 +13,7 @@ using Baibaocp.LotteryDispatcher.Models.Results;
 using Microsoft.Extensions.Logging;
 using Fighting.Extensions.Caching.DependencyInjection;
 using Fighting.Extensions.Caching.Redis.DependencyInjection;
+using Fighting.Storaging.DependencyInjection;
 
 namespace Baibaocp.LotteryDispatcher.Hosting
 {
@@ -65,6 +66,13 @@ namespace Baibaocp.LotteryDispatcher.Hosting
                             options.AddHandler<ShanghaiOrderingExecuteHandler, OrderingExecuter, OrderingResult>("900");
                             options.AddHandler<ShanghaiAwardingExecuteHandler, AwardingExecuter, AwardingResult>("800");
                             options.AddHandler<ShanghaiTicketingExecuteHandler, TicketingExecuter, TicketingResult>("800");
+                        });
+                    });
+                    services.AddStoraging(storageBuilder => 
+                    {
+                        storageBuilder.ConfigureOptions(options =>
+                        {
+                            options.DefaultNameOrConnectionString = "server=192.168.1.21; database=Baibaocp; uid=dba; password=L4H]JtuA2RaWl@^]S$9a4dN-!,01Z7Qs;";
                         });
                     });
                     services.AddScoped<IHostedService, LotteryDispatcherServices>();

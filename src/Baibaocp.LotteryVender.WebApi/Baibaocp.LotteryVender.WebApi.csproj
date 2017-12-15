@@ -37,7 +37,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Baibaocp.Core\Baibaocp.Core.csproj" />
     <ProjectReference Include="..\Baibaocp.LotteryVender.Core\Baibaocp.LotteryVender.Core.csproj" />
-    <ProjectReference Include="..\Baibaocp.Storaging.EntityFrameworkCore\Baibaocp.Storaging.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
 </Project>

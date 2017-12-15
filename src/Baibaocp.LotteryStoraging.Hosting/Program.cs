@@ -1,11 +1,10 @@
 ﻿using Baibaocp.Core.Messages;
 using Baibaocp.LotteryStoraging.Abstractions;
-using Baibaocp.Storaging.EntityFrameworkCore;
 using Fighting.Extensions.Caching.DependencyInjection;
 using Fighting.Extensions.Caching.Redis.DependencyInjection;
 using Fighting.Extensions.Messaging.DependencyInjection;
 using Fighting.Extensions.Serialization.Json.DependencyInjection;
-using Fighting.Storaging.EntityFrameworkCore.DependencyInjection;
+using Fighting.Storaging.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
@@ -45,16 +44,18 @@ namespace Baibaocp.LotteryStoraging.Hosting
                         {
                             messageOptions.AddConsumer<OrderingMessage>("Orders.Storaging");
                             messageOptions.AddConsumer<AwardingMessage>("Awards.Storaging");
-                            messageOptions.AddConsumer<TicketingMessage>("Tickets.Storaging");
+                            messageOptions.AddConsumer<TicketedMessage>("Tickets.Storaging");
                         });
                     });
 
 
-                    services.AddEntityFrmaeworkStorage<BaibaocpStorage>(storageOptions =>
+                    services.AddStoraging(storageBuilder =>
                     {
-                        storageOptions.DefaultNameOrConnectionString = "server=192.168.1.21; database=Baibaocp; uid=dba; password=L4H]JtuA2RaWl@^]S$9a4dN-!,01Z7Qs;";
+                        storageBuilder.ConfigureOptions(storageOptions =>
+                        {
+                            storageOptions.DefaultNameOrConnectionString = "server=192.168.1.21; database=Baibaocp; uid=dba; password=L4H]JtuA2RaWl@^]S$9a4dN-!,01Z7Qs;";
+                        });
                     });
-
                     services.AddScoped<IHostedService, LotteryStoragingServices>();
                 });
             await host.RunConsoleAsync();

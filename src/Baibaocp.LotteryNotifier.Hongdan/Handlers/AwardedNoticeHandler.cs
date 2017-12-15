@@ -1,31 +1,34 @@
 ﻿using Baibaocp.LotteryNotifier.Abstractions;
 using Baibaocp.LotteryNotifier.Notifiers;
 using Fighting.Extensions.Serialization.Abstractions;
+using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Baibaocp.LotteryNotifier.Hongdan.Handlers
 {
-    public class AwardedNoticeHandler : INoticeHandler<AwardedNotifier>
+    public class AwardedNoticeHandler : INoticeHandler<Awarded>
     {
         private readonly HttpClient _client;
 
         private readonly ISerializer _serializer;
 
-        private readonly LotteryNoticeOptions _options;
+        private readonly NoticeConfiguration _options;
 
-        public AwardedNoticeHandler(ISerializer serializer, LotteryNoticeOptions options)
+        public AwardedNoticeHandler(ISerializer serializer, NoticeConfiguration options)
         {
             _options = options;
             _serializer = serializer;
-            _client = new HttpClient();
+            _client = new HttpClient
+            {
+                BaseAddress = new Uri(_options.Url)
+            };
         }
 
-        public async Task<bool> HandleAsync(AwardedNotifier notifier)
+        public async Task<bool> HandleAsync(Awarded awarded)
         {
-            NoticeConfiguration configuration = _options.Configures.SingleOrDefault(predicate => predicate.LvpVenderId == notifier.LvpVenderId);
-            HttpResponseMessage responseMessage = (await _client.PostAsync(configuration.Url, new StringContent(""))).EnsureSuccessStatusCode();
+            HttpResponseMessage responseMessage = (await _client.PostAsync("/ordernotify/returnaward", new ByteArrayContent(_serializer.Serialize(awarded)))).EnsureSuccessStatusCode();
             string content = await responseMessage.Content.ReadAsStringAsync();
             return true;
         }

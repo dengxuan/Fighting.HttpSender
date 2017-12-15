@@ -2,12 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Baibaocp.LotteryStoraging</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dapper" Version="1.50.4" />
     <PackageReference Include="Fighting.Extensions.Caching.Abstractions" Version="1.0.0" />
     <PackageReference Include="Fighting.Extensions.Messaging.Abstractions" Version="1.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.1.0-preview1-27654" />
+    <PackageReference Include="Pomelo.Data.MySql" Version="1.0.0" />
     <PackageReference Include="Scrutor" Version="2.1.2" />
   </ItemGroup>
 

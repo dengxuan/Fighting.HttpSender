@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Baibaocp.Core;
 
 namespace Baibaocp.LotteryDispatcher.Abstractions
 {
     public interface IResult
     {
-        int Code { get; }
+        OrderStatus Code { get; }
 
         string Message { get; }
     }

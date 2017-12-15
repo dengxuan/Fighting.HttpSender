@@ -5,7 +5,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="JcOdds.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Baibaocp.LotteryDispatcher.Shanghai.Abstractions\Baibaocp.LotteryDispatcher.Shanghai.Abstractions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="1.50.4" />
+    <PackageReference Include="Fighting.Extensions.Caching.Abstractions" Version="1.0.0" />
+    <PackageReference Include="Pomelo.Data.MySql" Version="1.0.0" />
+    <PackageReference Include="zlib.net" Version="1.0.4" />
   </ItemGroup>
 
 </Project>

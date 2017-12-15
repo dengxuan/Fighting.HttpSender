@@ -1,62 +1,67 @@
-﻿using Baibaocp.Core.Messages;
-using Baibaocp.LotteryVender.Core.Entities;
+﻿using Baibaocp.Core;
+using Baibaocp.Core.Messages;
+using Dapper;
 using Fighting.Extensions.Caching.Abstractions;
 using Fighting.Extensions.Messaging.Abstractions;
-using Fighting.Storaging.Repositories.Abstractions;
+using Fighting.Storaging;
+using Fighting.Storaging.Abstractions;
+using Pomelo.Data.MySql;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Transactions;
 
-namespace Baibaocp.LotteryStorager.Abstractions.MessageHandlers
+namespace Baibaocp.LotteryStorager.MessageHandlers
 {
-    internal class OrderingStorageMessageHandler : IMessageHandler<OrderingMessage>
+    public class OrderingStorageMessageHandler : IMessageHandler<OrderingMessage>
     {
+
+        private readonly StorageOptions _options;
+
         private readonly ICacheManager _cacheManager;
 
-        private readonly IRepository<LotteryVenderEntities, string> _venderRepository;
+        private readonly IMessagePublisher _publisher;
 
-        private readonly IRepository<LotteryVenderOrderEntity, string> _venderOrderRepository;
-
-        private readonly IRepository<LotteryVenderAccountDetailEntity, string> _venderAccountDetailRepository;
+        private readonly IStringGenerator _stringGenerator;
 
 
-        public OrderingStorageMessageHandler(ICacheManager cacheManager, IRepository<LotteryVenderEntities, string> venderRepository, IRepository<LotteryVenderOrderEntity, string> venderOrderRepository, IRepository<LotteryVenderAccountDetailEntity, string> venderAccountDetailRepository)
+        public OrderingStorageMessageHandler(StorageOptions options, ICacheManager cacheManager, IMessagePublisher publisher, IStringGenerator stringGenerator)
         {
+            _options = options;
             _cacheManager = cacheManager;
-            _venderRepository = venderRepository;
-            _venderOrderRepository = venderOrderRepository;
-            _venderAccountDetailRepository = venderAccountDetailRepository;
+            _publisher = publisher;
+            _stringGenerator = stringGenerator;
         }
 
         public async Task<bool> Handle(OrderingMessage message, CancellationToken token)
         {
-            LotteryVenderEntities lotteryVender = await _venderRepository.GetAsync(message.LvpVenderId);
-            LotteryVenderOrderEntity order = new LotteryVenderOrderEntity
+            message.Status = OrderStatus.Succeed;
+            message.CreationTime = DateTime.Now;
+            using (MySqlConnection connection = new MySqlConnection(_options.DefaultNameOrConnectionString))
             {
-                Id = message.OrderId,
-                LvpOrderId = message.OrderId,
-                LvpVenderId = message.LvpVenderId,
-                LvpUserId = message.LvpUserId,
-                LotteryBuyerId = 0,
-                LotteryId = message.LotteryId,
-                LotteryPlayId = message.LotteryPlayId,
-                InvestCode = message.InvestCode,
-                InvestAmount = message.InvestAmount,
-                InvestCount = message.InvestCount,
-                InvestTimes = message.InvestTimes,
-                InvestType = message.InvestType,
-                IssueNumber = message.IssueNumber,
-                Status = message.Status,
-                CreationTime = message.CreationTime
-            };
-            lotteryVender.Balance = lotteryVender.Balance - message.InvestAmount;
-            lotteryVender.TicketAmount = lotteryVender.TicketAmount + message.InvestAmount;
-            await _venderRepository.UpdateAsync(lotteryVender);
-            await _venderAccountDetailRepository.InsertAsync(new LotteryVenderAccountDetailEntity { Id = Guid.NewGuid().ToString("N"), VenderId =message.LvpVenderId, OrderId = message.OrderId, LotteryId = message.LotteryId, Amount = message.InvestAmount, Status = message.Status, CretionTime = DateTime.Now });
-            await _venderAccountDetailRepository.InsertAsync(new LotteryVenderAccountDetailEntity { Id = Guid.NewGuid().ToString("N"), VenderId = message.LdpVenderId, OrderId = message.LdpVenderId, LotteryId = message.LotteryId, Amount = message.InvestAmount, Status = message.Status, CretionTime = DateTime.Now });
-            await _venderOrderRepository.InsertAsync(order);
-            ICache cacher = _cacheManager.GetCache("LotteryVender.Orders");
-            await cacher.SetAsync(message.OrderId, Task.FromResult(order));
+                using (TransactionScope transaction = new TransactionScope())
+                {
+                    await connection.ExecuteAsync(@"INSERT INTO `Baibaocp`.`BbcpOrders`(`Id`,`LotteryBuyerId`,`LvpUserId`,`LvpVenderId`,`LotteryId`,`LotteryPlayId`,`IssueNumber`,`InvestCode`,`InvestType`,`InvestCount`,`InvestTimes`,`InvestAmount`,`Status`,`CreationTime`)VALUES(@Id,@LotteryBuyerId,@LvpUserId,@LvpVenderId,@LotteryId,@LotteryPlayId,@IssueNumber,@InvestCode,@InvestType,@InvestCount,@InvestTimes,@InvestAmount,@Status,@CreationTime);", new
+                    {
+                        Id = message.LvpOrderId,
+                        LotteryBuyerId = 619,
+                        LvpUserId = message.LvpUserId,
+                        LvpVenderId = message.LvpVenderId,
+                        LotteryId = message.LotteryId,
+                        LotteryPlayId = message.LotteryPlayId,
+                        IssueNumber = message.IssueNumber,
+                        InvestCode = message.InvestCode,
+                        InvestType = message.InvestType,
+                        InvestCount = message.InvestCount,
+                        InvestTimes = message.InvestTimes,
+                        InvestAmount = message.InvestAmount,
+                        Status = message.Status,
+                        CreationTime = message.CreationTime
+                    });
+                    await _publisher.Publish($"{RoutingkeyConsts.Orders.Storaged}.{message.LotteryId}.{message.LotteryPlayId}", message, token);
+                    transaction.Complete();
+                }
+            }
             return true;
         }
     }

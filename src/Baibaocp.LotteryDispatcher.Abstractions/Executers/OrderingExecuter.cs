@@ -4,7 +4,7 @@ namespace Baibaocp.LotteryDispatcher.Executers
 {
     public class OrderingExecuter : Executer
     {
-        internal OrderingExecuter(string lvpVenderId, string ldpVenderId) : base(lvpVenderId, ldpVenderId)
+        internal OrderingExecuter(string ldpVenderId) : base(ldpVenderId)
         {
         }
 

@@ -30,18 +30,18 @@ namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
             string Status = document.Element("ActionResult").Element("xCode").Value;
             if (Status.Equals("0"))
             {
-                return new AwardingResult(OrderStatus.Awarding.Winning);
+                return new AwardingResult(OrderStatus.TicketWinning);
             }
             else if (Status.Equals("1"))
             {
-                return new AwardingResult(OrderStatus.Awarding.Waiting);
+                return new AwardingResult(OrderStatus.TicketDrawing);
             }
             else
             {
                 // TODO: Log here and notice to admin
                 _logger.LogWarning("Response message {0}", document.ToString(SaveOptions.DisableFormatting | SaveOptions.OmitDuplicateNamespaces));
             }
-            return new AwardingResult(OrderStatus.Awarding.Waiting);
+            return new AwardingResult(OrderStatus.TicketDrawing);
         }
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Baibaocp.LotteryNotifier.Abstractions
 {
-    public interface INoticeHandler<TNotifier> where TNotifier : INotifier
+    public interface INoticeHandler<TNotice> where TNotice : class
     {
-        Task<bool> HandleAsync(TNotifier notifier);
+        Task<bool> HandleAsync(TNotice notice);
     }
 }
