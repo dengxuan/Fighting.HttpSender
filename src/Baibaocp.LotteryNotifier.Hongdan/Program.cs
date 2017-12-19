@@ -37,7 +37,7 @@ namespace Baibaocp.LotteryNotifier.Hongdan
                         }).ConfigureOptions(messageOptions =>
                         {
                             messageOptions.AddConsumer<TicketedMessage>("Lvp.Tickets.Notifier");
-                            messageOptions.AddConsumer<AwardingMessage>("Lvp.Awards.Notifier");
+                            messageOptions.AddConsumer<AwardedMessage>("Lvp.Awards.Notifier");
                         });
                     });
                     services.AddLotteryNotifier(builderAction =>

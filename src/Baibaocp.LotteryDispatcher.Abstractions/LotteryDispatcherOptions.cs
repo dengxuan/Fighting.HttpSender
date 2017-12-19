@@ -10,7 +10,7 @@ namespace Baibaocp.LotteryDispatcher
     {
         private readonly ConcurrentDictionary<(string ldpVenderId, Type executerType), Type> _ldpHandlerTypesMapping = new ConcurrentDictionary<(string ldpVenderId, Type executerType), Type>();
 
-        public void AddHandler<THandler, TExecuter, TResult>(string ldpVenderId) where THandler : IExecuteHandler<TExecuter, TResult> where TExecuter : IExecuter where TResult : IResult
+        public void AddHandler<THandler, TExecuter>(string ldpVenderId) where THandler : IExecuteHandler<TExecuter> where TExecuter : IExecuter
         {
             _ldpHandlerTypesMapping.TryAdd((ldpVenderId, typeof(TExecuter)), typeof(THandler));
         }

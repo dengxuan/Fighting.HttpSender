@@ -61,15 +61,5 @@ namespace Baibaocp.Core.Messages
         /// 投注金额
         /// </summary>
         public int InvestAmount { get; set; }
-
-        /// <summary>
-        /// 订单状态
-        /// </summary>
-        public OrderStatus Status { get; set; }
-
-        /// <summary>
-        /// 创建时间
-        /// </summary>
-        public DateTime CreationTime { get; set; }
     }
 }

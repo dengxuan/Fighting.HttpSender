@@ -1,5 +1,7 @@
 ﻿using Baibaocp.LotteryNotifier.Abstractions;
 using Microsoft.Extensions.Logging;
+using Polly;
+using Polly.Retry;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +12,8 @@ namespace Baibaocp.LotteryNotifier
     {
         private readonly ILogger _logger;
 
+        private readonly RetryPolicy<bool> _policy;
+
         private readonly LotteryNoticeOptions _options;
 
         private readonly INoticeHandlerFactory _handlerFactory;
@@ -19,26 +23,34 @@ namespace Baibaocp.LotteryNotifier
             _options = options;
             _handlerFactory = handlerFactory;
             _logger = loggerFactory.CreateLogger<NoticeDispatcher>();
+            _policy = Policy.Handle<Exception>().OrResult(false).WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)), (ex, time) =>
+            {
+                _logger.LogWarning($"${time} 推送失败:{ex.ToString()} 重试中...");
+            });
         }
 
         public async Task<bool> DispatchAsync<TNotice>(INotifier<TNotice> notifier) where TNotice : class
         {
             try
             {
-                NoticeConfiguration configuration = _options.Configures.Where(predicate => predicate.LvpVenderId == notifier.LvpVenderId).SingleOrDefault();
-                if(configuration == null)
+                bool result = await _policy.ExecuteAsync(async () =>
                 {
-                    return true;
-                }
-                var handler = _handlerFactory.GetHandler<TNotice>(configuration);
-                var result = await handler.HandleAsync(notifier.Notice);
-                return result;
+                    NoticeConfiguration configuration = _options.Configures.Where(predicate => predicate.LvpVenderId == notifier.LvpVenderId).SingleOrDefault();
+                    if (configuration == null)
+                    {
+                        return true;
+                    }
+                    var handler = _handlerFactory.GetHandler<TNotice>(configuration);
+
+                    return await handler.HandleAsync(notifier.Notice);
+                });
+                _logger.LogWarning("Notice {0} result:{1}", notifier, result);
             }
             catch (Exception ex)
             {
-                _logger.LogError("Dispatcher error : {0}", ex);
-                return false;
+                _logger.LogError(ex, "Notice error! {0}", notifier.LvpVenderId);
             }
+            return true;
         }
     }
 }

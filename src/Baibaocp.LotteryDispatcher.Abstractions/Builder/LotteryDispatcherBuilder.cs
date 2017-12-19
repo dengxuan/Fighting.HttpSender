@@ -27,9 +27,18 @@ namespace Baibaocp.LotteryDispatcher.Builder
             Services.Scan(s =>
             {
                 s.FromApplicationDependencies()
-                .AddClasses(f => f.AssignableTo(typeof(IExecuteHandler<,>)), !_discoverySettings.IncludeNonPublic)
+                .AddClasses(f => f.AssignableTo(typeof(IExecuteHandler<>)), !_discoverySettings.IncludeNonPublic)
                 .UsingRegistrationStrategy(_discoverySettings.RegistrationStrategy)
                 .AsSelf()
+                .WithLifetime(_discoverySettings.DiscoveredHandlersLifetime);
+            });
+
+            Services.Scan(s =>
+            {
+                s.FromApplicationDependencies()
+                .AddClasses(f => f.AssignableTo(typeof(IExecuterDispatcher<>)), !_discoverySettings.IncludeNonPublic)
+                .UsingRegistrationStrategy(_discoverySettings.RegistrationStrategy)
+                .AsImplementedInterfaces()
                 .WithLifetime(_discoverySettings.DiscoveredHandlersLifetime);
             });
         }

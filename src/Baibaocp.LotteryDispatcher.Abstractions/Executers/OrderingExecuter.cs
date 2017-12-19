@@ -1,29 +1,20 @@
-﻿using Baibaocp.LotteryDispatcher.Abstractions;
+﻿using Baibaocp.Core.Messages;
+using Baibaocp.LotteryDispatcher.Abstractions;
+using Fighting.Storaging;
+using System.Collections.Generic;
 
 namespace Baibaocp.LotteryDispatcher.Executers
 {
     public class OrderingExecuter : Executer
     {
-        internal OrderingExecuter(string ldpVenderId) : base(ldpVenderId)
+        internal OrderingExecuter(string ldpVenderId, List<OrderingMessage> lvpOrders) : base(ldpVenderId)
         {
+            LdpOrderId = SequentialStringGenerator.Instance.Create();
+            LvpOrders = lvpOrders;
         }
 
-        public string OrderId { get; set; }
+        public string LdpOrderId { get; }
 
-        public int LotteryId { get; set; }
-
-        public int LotteryPlayId { get; set; }
-
-        public int? IssueNumber { get; set; }
-
-        public sbyte InvestCount { get; set; }
-
-        public sbyte InvestTimes { get; set; }
-
-        public int InvestAmount { get; set; }
-
-        public bool InvestType { get; set; }
-
-        public string InvestCode { get; set; }
+        public IReadOnlyList<OrderingMessage> LvpOrders { get; }
     }
 }

@@ -15,7 +15,7 @@ using System.Transactions;
 
 namespace Baibaocp.LotteryStoraging.Abstractions.MessageHandlers
 {
-    public class AwardingStorageMessageHandler : IMessageHandler<AwardingMessage>
+    public class AwardingStorageMessageHandler : IMessageHandler<AwardedMessage>
     {
         private readonly StorageOptions _options;
 
@@ -30,7 +30,7 @@ namespace Baibaocp.LotteryStoraging.Abstractions.MessageHandlers
             _stringGenerator = stringGenerator;
         }
 
-        public async Task<bool> Handle(AwardingMessage message, CancellationToken token)
+        public async Task<bool> Handle(AwardedMessage message, CancellationToken token)
         {
             using (MySqlConnection connection = new MySqlConnection(_options.DefaultNameOrConnectionString))
             {
@@ -41,7 +41,7 @@ namespace Baibaocp.LotteryStoraging.Abstractions.MessageHandlers
 
                         await connection.ExecuteAsync("UPDATE `BbcpOrders` SET `BonusAmount`=@BonusAmount, `AfterTaxBonusAmount`=@AftertaxBonusAmount, `Status` = `Status` | @Status WHERE `Id`=@Id", new
                         {
-                            Id = message.OrderId,
+                            Id = message.LvpOrderId,
                             BonusAmount = message.Amount,
                             AftertaxBonusAmount = message.AftertaxAmount,
                             Status = OrderStatus.TicketWinning
@@ -58,7 +58,7 @@ namespace Baibaocp.LotteryStoraging.Abstractions.MessageHandlers
                             Id = _stringGenerator.Create(),
                             ChannelId = message.LdpVenderId,
                             LotteryId = message.LotteryId,
-                            OrderId = message.OrderId,
+                            OrderId = message.LvpOrderId,
                             Amount = message.Amount,
                             Status = OrderStatus.TicketWinning,
                             CreationTime = DateTime.Now
@@ -75,7 +75,7 @@ namespace Baibaocp.LotteryStoraging.Abstractions.MessageHandlers
                             Id = _stringGenerator.Create(),
                             ChannelId = message.LvpVenderId,
                             LotteryId = message.LotteryId,
-                            OrderId = message.OrderId,
+                            OrderId = message.LvpOrderId,
                             Amount = message.Amount,
                             Status = OrderStatus.TicketWinning,
                             CreationTime = DateTime.Now

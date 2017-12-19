@@ -17,6 +17,7 @@
   <ItemGroup>
     <PackageReference Include="Fighting.Extensions.Caching.Abstractions" Version="1.0.0" />
     <PackageReference Include="Fighting.Extensions.Messaging.Abstractions" Version="1.0.0" />
+    <PackageReference Include="HangFire.Core" Version="1.6.17" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.1.0-preview1-27654" />
     <PackageReference Include="Scrutor" Version="2.1.2" />
   </ItemGroup>

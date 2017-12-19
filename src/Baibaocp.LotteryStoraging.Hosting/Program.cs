@@ -43,7 +43,7 @@ namespace Baibaocp.LotteryStoraging.Hosting
                         }).ConfigureOptions(messageOptions =>
                         {
                             messageOptions.AddConsumer<OrderingMessage>("Orders.Storaging");
-                            messageOptions.AddConsumer<AwardingMessage>("Awards.Storaging");
+                            messageOptions.AddConsumer<AwardedMessage>("Awards.Storaging");
                             messageOptions.AddConsumer<TicketedMessage>("Tickets.Storaging");
                         });
                     });

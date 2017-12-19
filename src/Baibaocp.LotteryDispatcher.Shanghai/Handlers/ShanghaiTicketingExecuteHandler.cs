@@ -1,7 +1,8 @@
 ﻿using Baibaocp.Core;
+using Baibaocp.Core.Messages;
 using Baibaocp.LotteryDispatcher.Executers;
-using Baibaocp.LotteryDispatcher.Models.Results;
 using Dapper;
+using Fighting.Extensions.Messaging.Abstractions;
 using Fighting.Storaging;
 using Microsoft.Extensions.Logging;
 using Pomelo.Data.MySql;
@@ -10,19 +11,25 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
 {
-    public class ShanghaiTicketingExecuteHandler : ShanghaiExecuteHandler<TicketingExecuter, TicketingResult>
+    public class ShanghaiTicketingExecuteHandler : ShanghaiExecuteHandler<TicketingExecuter>
     {
-        private readonly ILogger<ShanghaiTicketingExecuteHandler> _logger;
+        private readonly IMessagePublisher _publisher;
+
         private readonly StorageOptions _storageOptions;
 
-        public ShanghaiTicketingExecuteHandler(ShanghaiDispatcherOptions options, StorageOptions storageOptions, ILoggerFactory loggerFactory) : base(options, loggerFactory, "102")
+        private readonly ILogger<ShanghaiTicketingExecuteHandler> _logger;
+
+        public ShanghaiTicketingExecuteHandler(ShanghaiDispatcherOptions options, StorageOptions storageOptions, ILoggerFactory loggerFactory, IMessagePublisher publisher) : base(options, loggerFactory, "102")
         {
             _logger = loggerFactory.CreateLogger<ShanghaiTicketingExecuteHandler>();
             _storageOptions = storageOptions;
+            _publisher = publisher;
         }
 
         /// <summary>  
@@ -51,48 +58,13 @@ namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
                 }
             }
         }
-        protected override string MakeRequest(TicketingExecuter executer)
+        protected override string BuildRequest(TicketingExecuter executer)
         {
             string[] values = new string[]
             {
-                    string.Format("OrderID={0}", executer.OrderId)
+                    string.Format("OrderID={0}", executer.LdpOrderId)
             };
             return string.Join("_", values);
-        }
-
-        protected override TicketingResult MakeResult(XDocument document)
-        {
-            _logger.LogTrace(document.ToString());
-
-            string Status = document.Element("ActionResult").Element("xCode").Value;
-            if (Status.Equals("1"))
-            {
-                string odds = document.Element("ActionResult").Element("xValue").Value.Split('_')[3];
-                string xml = DeflateDecompress(odds);
-
-                return new TicketingResult(OrderStatus.TicketDrawing)
-                {
-                    TicketOdds = GetOdds(xml)
-                };
-            }
-            else if (Status.Equals("2002"))
-            {
-#if DEBUG
-                return new TicketingResult(OrderStatus.Ticketing);
-#else
-                return new TicketingResult(OrderStatus.Ticketing);
-#endif
-            }
-            else if (Status.Equals("2003"))
-            {
-                return new TicketingResult(OrderStatus.TicketFailed);
-            }
-            else
-            {
-                // TODO: Log here and notice to admin
-                _logger.LogWarning("Response message {0}", document.ToString(SaveOptions.DisableFormatting | SaveOptions.OmitDuplicateNamespaces));
-            }
-            return new TicketingResult(OrderStatus.Ticketing);
         }
 
         protected string GetOdds(string xml)
@@ -117,8 +89,60 @@ namespace Baibaocp.LotteryDispatcher.Shanghai.Handlers
                     }
                 }
                 return sb.ToString();
-
             }
+        }
+
+        public override async Task<bool> HandleAsync(TicketingExecuter executer)
+        {
+            string xml = await Send(executer);
+            XDocument document = XDocument.Parse(xml);
+
+            _logger.LogTrace(document.ToString());
+
+            string Status = document.Element("ActionResult").Element("xCode").Value;
+            if (Status.Equals("1"))
+            {
+                string odds = document.Element("ActionResult").Element("xValue").Value.Split('_')[3];
+                string oddsXml = DeflateDecompress(odds);
+
+                foreach (var lvpOrder in executer.LvpOrders)
+                {
+                    await _publisher.Publish(RoutingkeyConsts.Tickets.Completed.Success, new TicketedMessage
+                    {
+                        LvpOrderId = lvpOrder.LvpOrderId,
+                        LvpVenderId = lvpOrder.LvpVenderId,
+                        LdpOrderId = executer.LdpOrderId,
+                        LdpVenderId = executer.LdpVenderId,
+                        LotteryId = lvpOrder.LotteryId,
+                        LotteryPlayId = lvpOrder.LotteryPlayId,
+                        Amount = lvpOrder.InvestAmount,
+                        TicketOdds = GetOdds(oddsXml),
+                        Status = OrderStatus.TicketDrawing
+                    }, CancellationToken.None);
+                }
+                return true;
+            }
+            else if (Status.Equals("2003"))
+            {
+                foreach (var lvpOrder in executer.LvpOrders)
+                {
+                    await _publisher.Publish(RoutingkeyConsts.Tickets.Completed.Failure, new TicketedMessage
+                    {
+                        LvpOrderId = lvpOrder.LvpOrderId,
+                        LvpVenderId = lvpOrder.LvpVenderId,
+                        LdpOrderId = executer.LdpOrderId,
+                        LdpVenderId = executer.LdpVenderId,
+                        LotteryId = lvpOrder.LotteryId,
+                        LotteryPlayId = lvpOrder.LotteryPlayId,
+                        Amount = lvpOrder.InvestAmount,
+                        Status = OrderStatus.TicketFailed
+                    }, CancellationToken.None);
+                }
+                return true;
+            }
+            // TODO: Log here and notice to admin
+            _logger.LogWarning("Response message {0}", document.ToString(SaveOptions.DisableFormatting | SaveOptions.OmitDuplicateNamespaces));
+            return false;
         }
     }
 }

@@ -1,25 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Baibaocp.Core.Messages
 {
+    /// <summary>
+    /// 待返奖订单
+    /// </summary>
     public class AwardingMessage
     {
-        public string OrderId { get; set; }
-
-        public string LvpVenderId { get; set; }
+        public string LdpOrderId { get; set; }
 
         public string LdpVenderId { get; set; }
 
-        public int LotteryId { get; set; }
-
-        public string TicketOdds { get; set; }
-
-        public int Amount { get; set; }
-
-        public int AftertaxAmount { get; set; }
-
-        public OrderStatus Status { get; set; }
+        public List<OrderingMessage> LvpOrders { get; set; }
     }
 }

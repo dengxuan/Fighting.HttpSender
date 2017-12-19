@@ -35,8 +35,6 @@ namespace Baibaocp.LotteryStorager.MessageHandlers
 
         public async Task<bool> Handle(OrderingMessage message, CancellationToken token)
         {
-            message.Status = OrderStatus.Succeed;
-            message.CreationTime = DateTime.Now;
             using (MySqlConnection connection = new MySqlConnection(_options.DefaultNameOrConnectionString))
             {
                 using (TransactionScope transaction = new TransactionScope())
@@ -55,8 +53,8 @@ namespace Baibaocp.LotteryStorager.MessageHandlers
                         InvestCount = message.InvestCount,
                         InvestTimes = message.InvestTimes,
                         InvestAmount = message.InvestAmount,
-                        Status = message.Status,
-                        CreationTime = message.CreationTime
+                        Status = OrderStatus.Succeed,
+                        CreationTime = DateTime.Now
                     });
                     await _publisher.Publish($"{RoutingkeyConsts.Orders.Storaged}.{message.LotteryId}.{message.LotteryPlayId}", message, token);
                     transaction.Complete();

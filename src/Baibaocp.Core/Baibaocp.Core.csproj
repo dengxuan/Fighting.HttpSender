@@ -13,6 +13,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="Messages\AwardingMessage.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Fighting.Storaging.Abstractions" Version="1.0.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.4.0" />
   </ItemGroup>

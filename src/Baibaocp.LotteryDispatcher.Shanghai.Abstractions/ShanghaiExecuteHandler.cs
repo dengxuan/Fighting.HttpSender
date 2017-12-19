@@ -6,15 +6,14 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Baibaocp.LotteryDispatcher.Shanghai
 {
-    public abstract class ShanghaiExecuteHandler<TExecuter, TResult> : IExecuteHandler<TExecuter, TResult> where TExecuter : IExecuter where TResult : IResult
+    public abstract class ShanghaiExecuteHandler<TExecuter> : IExecuteHandler<TExecuter> where TExecuter : IExecuter
     {
         private readonly string _command;
 
-        private readonly ILogger<ShanghaiExecuteHandler<TExecuter, TResult>> _logger;
+        private readonly ILogger<ShanghaiExecuteHandler<TExecuter>> _logger;
 
         private readonly HttpClient _httpClient;
 
@@ -24,7 +23,7 @@ namespace Baibaocp.LotteryDispatcher.Shanghai
         {
             _options = options;
             _command = command;
-            _logger = loggerFactory.CreateLogger<ShanghaiExecuteHandler<TExecuter, TResult>>();
+            _logger = loggerFactory.CreateLogger<ShanghaiExecuteHandler<TExecuter>>();
             HttpClientHandler handler = new HttpClientHandler()
             {
                 AutomaticDecompression = System.Net.DecompressionMethods.Deflate
@@ -42,13 +41,9 @@ namespace Baibaocp.LotteryDispatcher.Shanghai
             return text.ToMd5();
         }
 
-        protected abstract string MakeRequest(TExecuter executer);
-
-        protected abstract TResult MakeResult(XDocument document);
-
-        public virtual async Task<TResult> HandleAsync(TExecuter executer)
+        protected async Task<string> Send(TExecuter executer)
         {
-            string value = MakeRequest(executer);
+            string value = BuildRequest(executer);
             string sign = Signature(_command, executer.LdpVenderId, value, out DateTime timestamp);
             FormUrlEncodedContent content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
             {
@@ -58,21 +53,16 @@ namespace Baibaocp.LotteryDispatcher.Shanghai
                 new KeyValuePair<string, string>("wSign",sign.ToLower()),
                 new KeyValuePair<string, string>("wParam",value),
             });
-            try
-            {
-                _logger.LogDebug("Request message: {0}", content.ToString());
-                HttpResponseMessage responseMessage = (await _httpClient.PostAsync("lotsale/lot", content)).EnsureSuccessStatusCode();
-                byte[] bytes = await responseMessage.Content.ReadAsByteArrayAsync();
-                string msg = Encoding.GetEncoding("GB2312").GetString(bytes);
-                _logger.LogDebug("Response message: {0}", msg);
-                XDocument document = XDocument.Parse(msg);
-                return MakeResult(document);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Request Exception:", ex);
-                throw ex;
-            }
+            _logger.LogDebug("Request message: {0}", content.ToString());
+            HttpResponseMessage responseMessage = (await _httpClient.PostAsync("lotsale/lot", content)).EnsureSuccessStatusCode();
+            byte[] bytes = await responseMessage.Content.ReadAsByteArrayAsync();
+            string msg = Encoding.GetEncoding("GB2312").GetString(bytes);
+            _logger.LogDebug("Response message: {0}", msg);
+            return msg;
         }
+
+        protected abstract string BuildRequest(TExecuter executer);
+
+        public abstract Task<bool> HandleAsync(TExecuter executer);
     }
 }

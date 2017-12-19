@@ -1,19 +1,18 @@
 ﻿using Baibaocp.Core.Messages;
-using Fighting.Extensions.Messaging.DependencyInjection;
-using Fighting.Extensions.Serialization.Json.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Baibaocp.LotteryDispatcher.DependencyInjection;
-using System;
-using System.Threading.Tasks;
-using Baibaocp.LotteryDispatcher.Shanghai.Handlers;
-using Baibaocp.LotteryDispatcher.Shanghai.DependencyInjection;
 using Baibaocp.LotteryDispatcher.Executers;
-using Baibaocp.LotteryDispatcher.Models.Results;
-using Microsoft.Extensions.Logging;
+using Baibaocp.LotteryDispatcher.Shanghai.DependencyInjection;
+using Baibaocp.LotteryDispatcher.Shanghai.Handlers;
 using Fighting.Extensions.Caching.DependencyInjection;
 using Fighting.Extensions.Caching.Redis.DependencyInjection;
+using Fighting.Extensions.Messaging.DependencyInjection;
+using Fighting.Extensions.Serialization.Json.DependencyInjection;
 using Fighting.Storaging.DependencyInjection;
+using Hangfire;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace Baibaocp.LotteryDispatcher.Hosting
 {
@@ -24,6 +23,8 @@ namespace Baibaocp.LotteryDispatcher.Hosting
             var host = new HostBuilder()
                 .ConfigureServices((hostContext, services) =>
                 {
+                    GlobalConfiguration.Configuration.UseRedisStorage("192.168.1.21:6379,password=zf8Mjjo6rLKDzf81,defaultDatabase=9");
+
                     services.AddJson();
                     services.AddCaching(cacheBuilder => 
                     {
@@ -49,7 +50,7 @@ namespace Baibaocp.LotteryDispatcher.Hosting
                         }).ConfigureOptions(messageOptions =>
                         {
                             messageOptions.AddConsumer<OrderingMessage>("Ldp.Orders.Dispatcher");
-                            messageOptions.AddConsumer<AwardingMessage>("Ldp.Awards.Dispatcher");
+                            messageOptions.AddConsumer<AwardedMessage>("Ldp.Awards.Dispatcher");
                             messageOptions.AddConsumer<TicketingMessage>("Ldp.Tickets.Dispatcher");
                         });
                     });
@@ -62,10 +63,10 @@ namespace Baibaocp.LotteryDispatcher.Hosting
                         });
                         builderAction.ConfigureOptions(options =>
                         {
-                            options.AddHandler<ShanghaiOrderingExecuteHandler, OrderingExecuter, OrderingResult>("800");
-                            options.AddHandler<ShanghaiOrderingExecuteHandler, OrderingExecuter, OrderingResult>("900");
-                            options.AddHandler<ShanghaiAwardingExecuteHandler, AwardingExecuter, AwardingResult>("800");
-                            options.AddHandler<ShanghaiTicketingExecuteHandler, TicketingExecuter, TicketingResult>("800");
+                            options.AddHandler<ShanghaiOrderingExecuteHandler, OrderingExecuter>("800");
+                            options.AddHandler<ShanghaiOrderingExecuteHandler, OrderingExecuter>("900");
+                            options.AddHandler<ShanghaiAwardingExecuteHandler, AwardingExecuter>("800");
+                            options.AddHandler<ShanghaiTicketingExecuteHandler, TicketingExecuter>("800");
                         });
                     });
                     services.AddStoraging(storageBuilder => 
